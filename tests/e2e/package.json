@@ -1,0 +1,12 @@
+{
+  "name": "eventra-e2e",
+  "private": true,
+  "description": "End-to-end checks against the running docker compose stack (http://localhost:8080)",
+  "scripts": {
+    "api": "bash api-e2e.sh",
+    "ui": "node ui-test.js ./screenshots"
+  },
+  "devDependencies": {
+    "puppeteer-core": "23.11.1"
+  }
+}
