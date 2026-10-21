@@ -46,8 +46,9 @@ export default function Home() {
     (signal) => api(`/events${toQuery({ ...filters, page: 1, limit: PAGE_SIZE })}`, { signal }),
     [q, category, from, sort],
   );
-  const next = useFetch((signal) => api('/events?limit=1', { signal }), []);
-  const nextEvent = next.data?.items?.[0];
+  // Feature the soonest event that still has seats (fall back to the soonest one).
+  const next = useFetch((signal) => api('/events?limit=10', { signal }), []);
+  const nextEvent = next.data?.items?.find((e) => !e.isSoldOut) || next.data?.items?.[0];
 
   const [loadingMore, setLoadingMore] = useState(false);
   async function loadMore() {
@@ -98,7 +99,7 @@ export default function Home() {
             }}
             className="flex flex-wrap gap-2 rounded-[18px] border border-line bg-surface p-2 shadow-float"
           >
-            <label className="flex min-h-[52px] flex-[2_1_220px] items-center gap-2.5 rounded-xl bg-canvas px-3.5">
+            <label className="flex min-h-[52px] min-w-0 flex-[2_1_160px] items-center gap-2.5 rounded-xl bg-canvas px-3.5">
               <Search className="size-5 shrink-0 text-muted" aria-hidden="true" />
               <span className="sr-only">Search</span>
               <input
@@ -110,12 +111,12 @@ export default function Home() {
                 className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted/80"
               />
             </label>
-            <label className="flex min-h-[52px] flex-[1_1_150px] flex-col justify-center rounded-xl bg-canvas px-3.5">
+            <label className="flex min-h-[52px] min-w-0 flex-[1_1_130px] flex-col justify-center rounded-xl bg-canvas px-3.5">
               <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">Category</span>
               <select
                 value={category}
                 onChange={(e) => updateParam('category', e.target.value)}
-                className="bg-transparent text-[15px] font-medium outline-none"
+                className="w-full min-w-0 bg-transparent text-[15px] font-medium outline-none"
               >
                 <option value="">All categories</option>
                 {CATEGORIES.map((c) => (
@@ -123,13 +124,13 @@ export default function Home() {
                 ))}
               </select>
             </label>
-            <label className="flex min-h-[52px] flex-[1_1_150px] flex-col justify-center rounded-xl bg-canvas px-3.5">
+            <label className="flex min-h-[52px] min-w-0 flex-[1_1_130px] flex-col justify-center rounded-xl bg-canvas px-3.5">
               <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">From date</span>
               <input
                 type="date"
                 value={from}
                 onChange={(e) => updateParam('from', e.target.value)}
-                className="bg-transparent text-[15px] font-medium outline-none"
+                className="w-full min-w-0 bg-transparent text-[15px] font-medium outline-none"
               />
             </label>
             <Button type="submit" size="lg" className="flex-[0_0_auto] !rounded-xl">

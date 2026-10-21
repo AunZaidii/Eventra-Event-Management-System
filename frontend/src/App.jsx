@@ -20,7 +20,11 @@ const Registrations = lazy(() => import('./pages/admin/Registrations'));
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+  // Block body on purpose: scrollTo() returns a Promise in newer browsers, and an
+  // effect must return nothing or a cleanup function.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
   return null;
 }
 

@@ -1,5 +1,42 @@
 # Test Report: Eventra
 
+> **Latest run: 2026-10-21, re-test after Fix loop 1 and Fix loop 2: ALL PASSED.**
+> The first run (below, kept for the record) found 3 UI bugs. All 3 are now fixed and verified.
+
+## Re-test summary (after fixes)
+
+| Suite | Passed | Failed |
+|---|---|---|
+| Backend unit + API tests (Jest + Supertest, real Postgres) | **78** | 0 |
+| API end-to-end through Nginx (`tests/e2e/api-e2e.sh`) | **27** | 0 |
+| Browser UI end-to-end, headless Chrome (`tests/e2e/ui-test.js`) | **29** | 0 |
+| Cloud-readiness checks (scaling, DB down, persistence) | **3** | 0 |
+| **Total** | **137** | **0** |
+
+### Bug status
+| Bug | Fixed in | Fix | Verified by |
+|---|---|---|---|
+| 1 (critical): blank screen on in-app navigation | Fix loop 1 | `frontend/src/App.jsx`: the `useEffect` now has a block body, so it no longer returns the Promise from `window.scrollTo()` | U9–U26 all pass (confirmation page, toast, admin login → dashboard, create/delete event in the UI, CSV button, log out); U27 no JS errors |
+| 2 (minor): Search button wrapped on desktop | Fix loop 2 (the loop 1 attempt was not enough) | `frontend/src/pages/Home.jsx`: smaller flex bases **and** `min-w-0` / `w-full` so the inputs can shrink | New check **U3b**: all search-bar items on one row at 1440px |
+| 3 (minor): "Next up" featured a sold-out event | Fix loop 1 | `Home.jsx`: picks the soonest event with seats left | New check **U3c** |
+
+### Test-script corrections (not app bugs)
+- U26 clicked the hidden desktop "Log out" button on a phone layout. It now clicks the one in the phone menu.
+- U27 counted Chrome's automatic "Failed to load resource" lines from the *intentional* 409/404/401 tests as errors. They're now ignored, and real JavaScript errors are still caught.
+
+### Spec success checks: final status
+All success checks in docs/spec.md §6 pass locally (✅), including the UI items that were blocked in the first run.
+Still to confirm on GitHub (the repo is private, so it can't be checked from here): the CI workflow is green on push, and the deploy job shows as skipped.
+
+## Result (latest)
+
+**ALL PASSED**
+
+---
+
+# First run (before fixes)
+
+
 - **Date:** 2026-10-21
 - **Tested version:** commit `8e9762a` (Phase 3) running with `docker compose up --build` from an empty database
 - **Environment:** Windows 11, Docker 29.8.2 / Compose v5.6, Node 24 (host), Node 22 + Nginx 1.27 + PostgreSQL 16 (containers), Chrome headless (UI tests)
@@ -103,6 +140,6 @@ Visual check (screenshots of home desktop, home phone and event details): matche
 
 ---
 
-## Result
+## Result (first run)
 
 **SOME FAILED**: 1 critical UI bug (blank screen on in-app navigation) and 2 minor UI issues. All backend, API, Docker and cloud-readiness checks pass.

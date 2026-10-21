@@ -39,7 +39,8 @@ const noHorizontalScroll = (page) =>
   const page = await browser.newPage();
   page.on('pageerror', (err) => problems.push(`pageerror: ${err.message}`));
   page.on('console', (msg) => {
-    if (msg.type() === 'error' && !/favicon|Failed to load resource.*(unsplash|images)/i.test(msg.text())) {
+    // 4xx responses from the intentional negative tests (409 duplicate, 404 missing, 401 wrong password) are expected
+    if (msg.type() === 'error' && !/favicon|Failed to load resource/i.test(msg.text())) {
       problems.push(`console: ${msg.text()}`);
     }
   });
@@ -56,6 +57,14 @@ const noHorizontalScroll = (page) =>
     const body = await text(page);
     check('U2 hero + next-up card render', body.includes('showing up') && body.includes('NEXT UP'));
     check('U3 sold-out badge visible on full event', /SOLD OUT/i.test(body));
+    const searchRow = await page.evaluate(() => {
+      const form = document.querySelector('form[role="search"]');
+      const tops = [...form.children].map((el) => Math.round(el.getBoundingClientRect().top));
+      return new Set(tops).size === 1;
+    });
+    check('U3b desktop search bar fits on one row (Search button not wrapped)', searchRow);
+    const nextUp = await page.$eval('aside[aria-label="Next event"]', (el) => el.innerText);
+    check('U3c "Next up" card features an event that still has seats', !/Seats left\s*0\b/.test(nextUp));
     await shot(page, '01-home-desktop');
 
     await page.click('button[aria-pressed]::-p-text(Workshop)');
@@ -187,7 +196,7 @@ const noHorizontalScroll = (page) =>
     await shot(page, '11-dashboard-phone');
 
     await page.click('button[aria-label="Open menu"]');
-    await page.click('button::-p-text(Log out)');
+    await page.click('header button::-p-text(Log out)');
     await page.waitForFunction(() => location.pathname === '/admin/login');
     check('U26 log out returns to login', true);
   } catch (err) {
