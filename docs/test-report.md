@@ -11,7 +11,8 @@
 | API end-to-end through Nginx (`tests/e2e/api-e2e.sh`) | **27** | 0 |
 | Browser UI end-to-end, headless Chrome (`tests/e2e/ui-test.js`) | **29** | 0 |
 | Cloud-readiness checks (scaling, DB down, persistence) | **3** | 0 |
-| **Total** | **137** | **0** |
+| GitHub Actions CI jobs (on push to `main`) | **3** (+ deploy correctly skipped) | 0 |
+| **Total** | **140** | **0** |
 
 ### Bug status
 | Bug | Fixed in | Fix | Verified by |
@@ -26,7 +27,7 @@
 
 ### Spec success checks: final status
 All success checks in docs/spec.md §6 pass locally (✅), including the UI items that were blocked in the first run.
-Still to confirm on GitHub (the repo is private, so it can't be checked from here): the CI workflow is green on push, and the deploy job shows as skipped.
+Confirmed on GitHub Actions (screenshot from the repo owner, 2026-10-21): **Backend tests ✅ · Frontend lint + build ✅ · Docker images build ✅ · Deploy to AWS ⊘ skipped** (expected until `AWS_DEPLOY_ENABLED` is set).
 
 ## Result (latest)
 
