@@ -1,0 +1,51 @@
+{
+  "family": "eventra-app",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "runtimePlatform": { "cpuArchitecture": "X86_64", "operatingSystemFamily": "LINUX" },
+  "executionRoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "app",
+      "image": "REPLACED_BY_PIPELINE",
+      "essential": true,
+      "portMappings": [{ "containerPort": 4000, "protocol": "tcp" }],
+      "environment": [
+        { "name": "NODE_ENV", "value": "production" },
+        { "name": "PORT", "value": "4000" },
+        { "name": "DB_PORT", "value": "5432" },
+        { "name": "DB_SSL", "value": "true" },
+        { "name": "JWT_EXPIRES_IN", "value": "8h" },
+        { "name": "TRUST_PROXY", "value": "1" },
+        { "name": "SEED_SAMPLE_DATA", "value": "false" }
+      ],
+      "secrets": [
+        { "name": "DB_HOST", "valueFrom": "${APP_SECRET_ARN}:DB_HOST::" },
+        { "name": "DB_NAME", "valueFrom": "${APP_SECRET_ARN}:DB_NAME::" },
+        { "name": "DB_USER", "valueFrom": "${APP_SECRET_ARN}:DB_USER::" },
+        { "name": "DB_PASSWORD", "valueFrom": "${APP_SECRET_ARN}:DB_PASSWORD::" },
+        { "name": "JWT_SECRET", "valueFrom": "${APP_SECRET_ARN}:JWT_SECRET::" },
+        { "name": "ADMIN_EMAIL", "valueFrom": "${APP_SECRET_ARN}:ADMIN_EMAIL::" },
+        { "name": "ADMIN_PASSWORD", "valueFrom": "${APP_SECRET_ARN}:ADMIN_PASSWORD::" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "wget -qO- http://127.0.0.1:4000/api/health > /dev/null || exit 1"],
+        "interval": 15,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 30
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/eventra",
+          "awslogs-region": "${AWS_REGION}",
+          "awslogs-stream-prefix": "app",
+          "awslogs-create-group": "true"
+        }
+      }
+    }
+  ]
+}

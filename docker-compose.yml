@@ -1,0 +1,87 @@
+# Eventra — three-tier stack: web (Nginx + React) → app (Express API) → db (PostgreSQL)
+# Usage:  cp .env.example .env   (then edit the values)
+#         docker compose up --build
+# Only the web service is published to the host. app and db are reachable
+# only inside the private "backend" network.
+
+name: eventra
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?Set DB_NAME in .env}
+      POSTGRES_USER: ${DB_USER:?Set DB_USER in .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend
+    # No "ports:" — the database is never exposed outside Docker.
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  app:
+    build:
+      context: ./backend
+    image: eventra-app:local
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-4000}
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-false}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      CORS_ORIGIN: ${CORS_ORIGIN:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Set ADMIN_EMAIL in .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      SEED_SAMPLE_DATA: ${SEED_SAMPLE_DATA:-false}
+    networks:
+      - backend
+    # No "ports:" — only Nginx (web) talks to the API.
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:$${PORT:-4000}/api/health > /dev/null || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    build:
+      context: ./frontend
+    image: eventra-web:local
+    restart: unless-stopped
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      BACKEND_URL: http://app:${PORT:-4000}
+    ports:
+      - '${WEB_PORT:-8080}:80'
+    networks:
+      - backend
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1/healthz > /dev/null || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  backend:
+
+volumes:
+  pgdata:

@@ -1,0 +1,190 @@
+# Eventra CI/CD
+#  CI (every push and pull request): backend tests on a real Postgres, frontend lint + build,
+#     and Docker image builds for both tiers.
+#  CD (push to main only, after CI passes): push images to Amazon ECR and deploy to ECS Fargate.
+#     The deploy job is SKIPPED until the repo variable AWS_DEPLOY_ENABLED is set to "true".
+#     See docs/deploy-plan.md for the one-time AWS setup.
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-test:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        # Throwaway CI database: trust auth, so no password is needed or stored.
+        env:
+          POSTGRES_USER: eventra
+          POSTGRES_DB: eventra_test
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eventra -d eventra_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: eventra_test
+      DB_USER: eventra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run test:coverage -- --ci
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage
+          if-no-files-found: ignore
+          retention-days: 7
+
+  frontend-build:
+    name: Frontend lint + build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+
+  docker-build:
+    name: Docker images build
+    runs-on: ubuntu-latest
+    needs: [backend-test, frontend-build]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build app (backend) image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: false
+          tags: eventra-app:ci
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,mode=max,scope=app
+      - name: Build web (frontend) image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: false
+          tags: eventra-web:ci
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+  deploy:
+    name: Deploy to AWS (ECR + ECS Fargate)
+    runs-on: ubuntu-latest
+    needs: docker-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.AWS_DEPLOY_ENABLED == 'true'
+    environment: production
+    permissions:
+      contents: read
+      id-token: write # lets GitHub log in to AWS with OIDC — no AWS keys stored anywhere
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      ECR_REPO_APP: ${{ vars.ECR_REPO_APP }}
+      ECR_REPO_WEB: ${{ vars.ECR_REPO_WEB }}
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push images
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          docker build -t "$REGISTRY/$ECR_REPO_APP:$IMAGE_TAG" -t "$REGISTRY/$ECR_REPO_APP:latest" ./backend
+          docker build -t "$REGISTRY/$ECR_REPO_WEB:$IMAGE_TAG" -t "$REGISTRY/$ECR_REPO_WEB:latest" ./frontend
+          docker push --all-tags "$REGISTRY/$ECR_REPO_APP"
+          docker push --all-tags "$REGISTRY/$ECR_REPO_WEB"
+          echo "APP_IMAGE=$REGISTRY/$ECR_REPO_APP:$IMAGE_TAG" >> "$GITHUB_ENV"
+          echo "WEB_IMAGE=$REGISTRY/$ECR_REPO_WEB:$IMAGE_TAG" >> "$GITHUB_ENV"
+
+      - name: Fill in task definition templates
+        env:
+          APP_SECRET_ARN: ${{ vars.APP_SECRET_ARN }}
+          BACKEND_URL: ${{ vars.BACKEND_URL }}
+        run: |
+          export AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+          vars='${AWS_ACCOUNT_ID} ${AWS_REGION} ${APP_SECRET_ARN} ${BACKEND_URL}'
+          envsubst "$vars" < infra/aws/task-definition-app.json > task-def-app.json
+          envsubst "$vars" < infra/aws/task-definition-web.json > task-def-web.json
+
+      - name: Render app task definition
+        id: render-app
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-def-app.json
+          container-name: app
+          image: ${{ env.APP_IMAGE }}
+
+      - name: Render web task definition
+        id: render-web
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-def-web.json
+          container-name: web
+          image: ${{ env.WEB_IMAGE }}
+
+      - name: Deploy app service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-app.outputs.task-definition }}
+          cluster: ${{ vars.ECS_CLUSTER }}
+          service: ${{ vars.ECS_SERVICE_APP }}
+          wait-for-service-stability: true
+
+      - name: Deploy web service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+        with:
+          task-definition: ${{ steps.render-web.outputs.task-definition }}
+          cluster: ${{ vars.ECS_CLUSTER }}
+          service: ${{ vars.ECS_SERVICE_WEB }}
+          wait-for-service-stability: true
