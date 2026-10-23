@@ -16,7 +16,7 @@ const STUDENT = {
   section: '[Section]',
   instructor: '[Instructor Name]',
 };
-const REPO_URL = 'https://github.com/AunZaidii/Event-Management-System';
+const REPO_URL = 'https://github.com/AunZaidii/Eventra-Event-Management-System';
 // -------------------------------------------
 
 const ROOT = path.resolve(__dirname, '..', '..');

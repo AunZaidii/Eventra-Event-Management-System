@@ -32,7 +32,7 @@ Save each screenshot in **`docs/evidence/screenshots/`** with the **exact file n
 | 19 | `19-ecr-repos.png` | **ECR** → *Private repositories* | `eventra-web` and `eventra-app`, *Scan on push: Enabled* |
 | 20 | `20-ecr-images.png` | **ECR** → `eventra-web` (then `eventra-app`) → *Images* | Image tags = **commit SHA** + `latest`, pushed time, size |
 | 21 | `21-secrets-manager.png` | **Secrets Manager** → *Secrets* | `eventra/app` listed (**do not** open "Retrieve secret value") |
-| 22 | `22-iam-oidc.png` | **IAM** → *Roles* → `eventra-github-deploy` → *Trust relationships* | Federated `token.actions.githubusercontent.com`, condition limited to `repo:AunZaidii/Event-Management-System` |
+| 22 | `22-iam-oidc.png` | **IAM** → *Roles* → `eventra-github-deploy` → *Trust relationships* | Federated `token.actions.githubusercontent.com`, condition limited to `repo:AunZaidii/Eventra-Event-Management-System` |
 | 23 | `23-cloudwatch-dashboard.png` | **CloudWatch** → *Dashboards* → `eventra-overview` | Graphs with data (open the site a few times first) |
 | 24 | `24-cloudwatch-alarms.png` | **CloudWatch** → *Alarms* → *All alarms* | The 4 `eventra-*` alarms (state *OK*) |
 | 25 | `25-cloudwatch-logs.png` | **CloudWatch** → *Log groups* → `/ecs/eventra` → a `app/app/…` stream | API startup lines: "Applied migration…", "Eventra API listening…" |

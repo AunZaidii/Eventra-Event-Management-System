@@ -13,7 +13,7 @@ variable "aws_region" {
 variable "github_repository" {
   description = "GitHub repo (owner/name) allowed to deploy through OIDC"
   type        = string
-  default     = "AunZaidii/Event-Management-System"
+  default     = "AunZaidii/Eventra-Event-Management-System"
 }
 
 variable "create_github_oidc_provider" {

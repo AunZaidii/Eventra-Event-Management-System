@@ -62,7 +62,7 @@ Each attribute below lists the **design decisions** that support it (with where 
 
 **CI/CD**
 - GitHub Actions authenticates with **OIDC**: there are **no long-lived AWS keys** in GitHub.
-- The deploy role trusts only `repo:AunZaidii/Event-Management-System` on `main` / the `production` environment.
+- The deploy role trusts only `repo:AunZaidii/Eventra-Event-Management-System` on `main` / the `production` environment.
 - It can push only to the two ECR repos, update only the two ECS services, and pass only the two ECS roles.
 - The workflow's default token is read-only.
 

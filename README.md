@@ -40,8 +40,8 @@ On AWS the same images run as: **Application Load Balancer** (public subnets) â†
 
 ```bash
 # 1. Get the code
-git clone https://github.com/AunZaidii/Event-Management-System.git
-cd Event-Management-System
+git clone https://github.com/AunZaidii/Eventra-Event-Management-System.git
+cd Eventra-Event-Management-System
 
 # 2. Create your settings file and edit the placeholder values
 cp .env.example .env

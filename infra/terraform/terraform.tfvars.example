@@ -1,6 +1,6 @@
 # Copy to terraform.tfvars and adjust (terraform.tfvars is git-ignored).
 aws_region        = "us-east-1"
-github_repository = "AunZaidii/Event-Management-System"
+github_repository = "AunZaidii/Eventra-Event-Management-System"
 admin_email       = "admin@eventra.app"
 
 # Email for CloudWatch alarms (confirm the subscription email AWS sends you)

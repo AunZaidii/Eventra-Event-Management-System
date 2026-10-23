@@ -156,7 +156,7 @@ Then on GitHub, set the variable `AWS_DEPLOY_ENABLED` to `false`, so pushes don'
 | Symptom | Cause / fix |
 |---|---|
 | `terraform apply`: *EntityAlreadyExists … OIDC provider* | Set `create_github_oidc_provider = false` and apply again |
-| Deploy job: *Not authorized to perform sts:AssumeRoleWithWebIdentity* | `AWS_ROLE_ARN` secret is wrong, or the run isn't on `main` |
+| Deploy job: *Not authorized to perform sts:AssumeRoleWithWebIdentity* | `AWS_ROLE_ARN` secret is wrong, the run isn't on `main`, or the repo was renamed. `github_repository` in `terraform.tfvars` must match the current `owner/name` exactly; fix it and run `terraform apply` |
 | Web tasks keep restarting with *host not found in upstream "app.eventra.local"* | The app service wasn't healthy yet. Wait for it, then ECS → `eventra-web` → *Update service* → **Force new deployment** |
 | App logs: *no pg_hba.conf entry … no encryption* | `DB_SSL` must be `true` (it is set in the task definition) |
 | Target group shows *unhealthy* | Check the `web` logs in CloudWatch `/ecs/eventra`. The health check path is `/healthz` |
