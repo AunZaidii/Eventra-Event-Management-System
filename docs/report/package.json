@@ -1,0 +1,14 @@
+{
+  "name": "eventra-report",
+  "private": true,
+  "description": "Builds the SE-490 technical report (Word .docx) from the repo docs and the evidence screenshots",
+  "scripts": {
+    "build": "node build-report.js"
+  },
+  "dependencies": {
+    "docx": "9.1.1"
+  },
+  "devDependencies": {
+    "mammoth": "1.8.0"
+  }
+}

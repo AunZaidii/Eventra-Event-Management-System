@@ -30,7 +30,7 @@ In simple words:
 2. **App tier (logic)**: a **Node.js + Express** REST API. It checks every input, applies the rules (no double registration, no overbooking), signs admin logins with JWT, and talks to the database. It keeps **no state** in memory or on disk, so you can run many copies behind a load balancer.
 3. **Database tier (data)**: **PostgreSQL** stores admins, events and registrations. It's reachable only by the app tier, and its data lives in a Docker volume, so it survives restarts.
 
-On AWS the same images run as: **Application Load Balancer** → **ECS Fargate** services (web + app) → **Amazon RDS PostgreSQL**.
+On AWS the same images run as: **Application Load Balancer** (public subnets) → **ECS Fargate** web service → (private ECS Service Connect) → **ECS Fargate** app service → **Amazon RDS PostgreSQL** (isolated DB subnets). See the [architecture diagram](docs/architecture/architecture.png).
 
 ---
 
@@ -103,7 +103,7 @@ All configuration comes from environment variables. Nothing secret is in the cod
 | `ADMIN_EMAIL` | app | **required** | Admin login email (account created or updated on start) |
 | `ADMIN_PASSWORD` | app | **required** | Admin login password (stored as a bcrypt hash) |
 | `SEED_SAMPLE_DATA` | app | `false` | `true` loads sample events when the events table is empty |
-| `TRUST_PROXY` | app | `1` | Number of proxies in front of the API (for correct client IPs in rate limiting) |
+| `TRUST_PROXY` | app | private + loopback ranges | Which proxies may set `X-Forwarded-For` (a hop count or address ranges), so rate limits see the real client IP |
 | `RATE_LIMIT_LOGIN_MAX` | app | `10` | Login attempts per IP per 15 minutes |
 | `RATE_LIMIT_REGISTER_MAX` | app | `20` | Registrations per IP per 10 minutes |
 | `BACKEND_URL` | web | `http://app:4000` | Where Nginx forwards `/api` requests |
@@ -162,10 +162,33 @@ The test helpers refuse to run unless `DB_NAME` ends in `_test`, so tests can ne
 
 1. **Backend tests**: Postgres service container, then `npm test` with coverage.
 2. **Frontend lint + build**: ESLint and a Vite production build.
-3. **Docker images build**: builds both images to prove the Dockerfiles work.
-4. **Deploy** (pushes to `main` only, after 1–3 pass): logs in to AWS with **OIDC** (no stored keys), pushes images to **Amazon ECR**, then rolls out new task definitions ([infra/aws](infra/aws)) to **ECS Fargate** and waits for the services to be stable.
+3. **Terraform validate**: `fmt -check`, `init` and `validate` of [infra/terraform](infra/terraform).
+4. **Docker images build**: builds both images to prove the Dockerfiles work.
+5. **Deploy** (on `main`, after 1–4 pass): logs in to AWS with **OIDC** (no stored keys), pushes images to **Amazon ECR** tagged with the commit SHA, rolls out new task-definition revisions to the **ECS Fargate** services, waits for them to be stable, and smoke-tests `/api/health` through the load balancer.
 
-The deploy job is **skipped** until the repository variable `AWS_DEPLOY_ENABLED` is `true`. The one-time AWS setup (ECR, ECS, ALB, RDS, Secrets Manager, IAM role and the GitHub variables) is described in [docs/deploy-plan.md](docs/deploy-plan.md).
+The deploy job is **skipped** until the repository variable `AWS_DEPLOY_ENABLED` is `true`.
+
+## Deploy to AWS (Terraform)
+
+All cloud infrastructure is code in [infra/terraform](infra/terraform):
+- **Network:** VPC `10.0.0.0/16` in 2 AZs, with public, private-app and private-db subnets, an Internet Gateway, route tables and a NAT instance.
+- **Security:** one security group per tier (ALB → web → app → DB).
+- **Services:** Application Load Balancer, ECS Fargate (web + app, Service Connect, auto scaling 1–3), RDS PostgreSQL 16, ECR, Secrets Manager, IAM (GitHub OIDC deploy role), and CloudWatch logs, dashboard and alarms.
+
+```bash
+cd infra/terraform
+terraform init
+terraform apply            # ~15 min; prints the GitHub variables to set
+terraform destroy          # remove everything when finished
+```
+
+| Document | Contents |
+|---|---|
+| [docs/deploy-plan.md](docs/deploy-plan.md) | Step-by-step: AWS setup, GitHub variables, first deploy, evidence, teardown |
+| [docs/evidence-checklist.md](docs/evidence-checklist.md) | The 29 deployment screenshots to take, with exact console pages and file names |
+| [docs/cost-estimate.md](docs/cost-estimate.md) | Monthly cost (≈ $65), pricing-calculator inputs, optimizations |
+| [docs/nfr.md](docs/nfr.md) | Non-functional requirements justification |
+| [docs/report/](docs/report) | `node build-report.js` builds the Word technical report with the screenshots |
 
 ---
 
@@ -174,8 +197,10 @@ The deploy job is **skipped** until the repository variable `AWS_DEPLOY_ENABLED`
 ```
 backend/      Express API: src/{config, db, routes, controllers, services, middleware, validators, utils}, tests/
 frontend/     React + Vite + Tailwind app: src/{pages, components, context, hooks, lib}, nginx/ config
-infra/aws/    ECS Fargate task definition templates used by the pipeline
-docs/         spec, design, test report, deploy plan
+infra/terraform/  AWS infrastructure as code (VPC, ALB, ECS, RDS, ECR, IAM, secrets, monitoring)
+infra/collect-evidence.sh  saves AWS CLI proof of every component
+tests/e2e/    end-to-end API script and headless-Chrome UI test
+docs/         spec, design, test report, deploy plan, NFRs, cost estimate, architecture diagram, report generator
 docker-compose.yml · .env.example · .github/workflows/ci-cd.yml
 ```
 

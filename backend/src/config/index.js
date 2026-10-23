@@ -39,7 +39,12 @@ const config = {
   isProduction: env.NODE_ENV === 'production',
   isTest: env.NODE_ENV === 'test',
   port: toInt(env.PORT, 4000),
-  trustProxy: toInt(env.TRUST_PROXY, 1),
+  // Which proxies may set X-Forwarded-For (so rate limits see the real client IP).
+  // Default: any private/loopback address — Nginx, the AWS ALB and the ECS Service
+  // Connect proxy all live there, however many hops there are. A number also works.
+  trustProxy: /^\d+$/.test(env.TRUST_PROXY || '')
+    ? Number(env.TRUST_PROXY)
+    : env.TRUST_PROXY || 'loopback, linklocal, uniquelocal',
 
   db: {
     host: required('DB_HOST'),

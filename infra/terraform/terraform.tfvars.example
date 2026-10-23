@@ -1,0 +1,15 @@
+# Copy to terraform.tfvars and adjust (terraform.tfvars is git-ignored).
+aws_region        = "us-east-1"
+github_repository = "AunZaidii/Event-Management-System"
+admin_email       = "admin@eventra.app"
+
+# Email for CloudWatch alarms (confirm the subscription email AWS sends you)
+alarm_email = ""
+
+# Set to false if your AWS account already has the GitHub OIDC provider
+create_github_oidc_provider = true
+
+# Cheapest setup (default). For higher availability use min_tasks = 2 and db_multi_az = true.
+min_tasks   = 1
+max_tasks   = 3
+db_multi_az = false

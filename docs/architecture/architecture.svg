@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1110" viewBox="0 0 1900 1110" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="ah-dark" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#232F3E"/></marker>
+    <marker id="ah-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C2410C"/></marker>
+    <marker id="ah-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1D4ED8"/></marker>
+    <marker id="ah-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker>
+  </defs>
+
+  <rect width="1900" height="1110" fill="#FFFFFF"/>
+  <text x="30" y="38" font-size="24" font-weight="bold" fill="#0B1020">Eventra — three-tier architecture on AWS (us-east-1)</text>
+  <text x="30" y="62" font-size="14" fill="#4B5563">Web tier (Nginx + React) · App tier (Node.js API) · Database tier (Amazon RDS PostgreSQL) · CI/CD with GitHub Actions · all infrastructure created by Terraform</text>
+
+  <!-- ===== Users and IGW ===== -->
+  <rect x="30" y="200" width="140" height="74" rx="10" fill="#F3F4F6" stroke="#374151" stroke-width="2"/>
+  <text x="100" y="230" font-size="16" font-weight="bold" text-anchor="middle" fill="#111827">Users</text>
+  <text x="100" y="252" font-size="13" text-anchor="middle" fill="#374151">web browser</text>
+
+  <!-- ===== AWS Cloud ===== -->
+  <rect x="215" y="80" width="1480" height="1010" rx="14" fill="none" stroke="#232F3E" stroke-width="2.5"/>
+  <rect x="215" y="80" width="300" height="30" rx="8" fill="#232F3E"/>
+  <text x="230" y="101" font-size="15" font-weight="bold" fill="#FFFFFF">AWS Cloud · Region us-east-1</text>
+
+  <!-- ===== VPC ===== -->
+  <rect x="250" y="125" width="1005" height="950" rx="12" fill="#FBFAFF" stroke="#8C4FFF" stroke-width="2.5"/>
+  <text x="300" y="150" font-size="15" font-weight="bold" fill="#6D28D9">VPC eventra-vpc · 10.0.0.0/16</text>
+
+  <!-- AZ bands -->
+  <rect x="288" y="160" width="452" height="900" rx="10" fill="none" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="8 6"/>
+  <text x="514" y="178" font-size="13" font-weight="bold" text-anchor="middle" fill="#4B5563">Availability Zone A</text>
+  <rect x="770" y="160" width="452" height="900" rx="10" fill="none" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="8 6"/>
+  <text x="996" y="178" font-size="13" font-weight="bold" text-anchor="middle" fill="#4B5563">Availability Zone B</text>
+
+  <!-- IGW on the VPC edge -->
+  <rect x="200" y="200" width="100" height="74" rx="10" fill="#7C3AED" stroke="#5B21B6" stroke-width="2"/>
+  <text x="250" y="232" font-size="14" font-weight="bold" text-anchor="middle" fill="#FFFFFF">Internet</text>
+  <text x="250" y="250" font-size="14" font-weight="bold" text-anchor="middle" fill="#FFFFFF">Gateway</text>
+  <line x1="170" y1="237" x2="198" y2="237" stroke="#232F3E" stroke-width="2.5" marker-end="url(#ah-dark)"/>
+  <text x="184" y="225" font-size="12" text-anchor="middle" fill="#111827">HTTP</text>
+
+  <!-- ===== Public subnets ===== -->
+  <rect x="303" y="188" width="422" height="160" rx="8" fill="#EEF7E8" stroke="#7AA116" stroke-width="1.5"/>
+  <text x="318" y="207" font-size="13" font-weight="bold" fill="#3F6212">Public subnet · 10.0.0.0/24</text>
+  <rect x="785" y="188" width="422" height="160" rx="8" fill="#EEF7E8" stroke="#7AA116" stroke-width="1.5"/>
+  <text x="800" y="207" font-size="13" font-weight="bold" fill="#3F6212">Public subnet · 10.0.1.0/24</text>
+  <text x="1194" y="207" font-size="11" text-anchor="end" fill="#3F6212">route 0.0.0.0/0 → IGW</text>
+
+  <!-- ALB spanning both AZs -->
+  <rect x="360" y="215" width="790" height="56" rx="8" fill="#8C4FFF" stroke="#6D28D9" stroke-width="2"/>
+  <text x="755" y="239" font-size="15" font-weight="bold" text-anchor="middle" fill="#FFFFFF">Application Load Balancer · eventra-alb (internet-facing, 2 AZs)</text>
+  <text x="755" y="259" font-size="12.5" text-anchor="middle" fill="#F5F3FF">listener HTTP :80 → target group eventra-web-tg (target type IP, health check /healthz)</text>
+  <rect x="1070" y="276" width="78" height="20" rx="10" fill="#FEE2E2" stroke="#B91C1C"/>
+  <text x="1109" y="290" font-size="11" font-weight="bold" text-anchor="middle" fill="#991B1B">alb-sg</text>
+  <line x1="300" y1="243" x2="358" y2="243" stroke="#232F3E" stroke-width="2.5" marker-end="url(#ah-dark)"/>
+
+  <!-- NAT instance -->
+  <rect x="318" y="284" width="250" height="54" rx="8" fill="#FFF7ED" stroke="#ED7100" stroke-width="2"/>
+  <text x="443" y="306" font-size="14" font-weight="bold" text-anchor="middle" fill="#9A3412">NAT instance (EC2 t4g.nano)</text>
+  <text x="443" y="325" font-size="11.5" text-anchor="middle" fill="#9A3412">outbound only · replaces NAT Gateway</text>
+
+  <!-- ===== ECS cluster / private app subnets ===== -->
+  <rect x="278" y="372" width="954" height="330" rx="10" fill="none" stroke="#ED7100" stroke-width="2" stroke-dasharray="10 5"/>
+
+  <rect x="303" y="400" width="422" height="292" rx="8" fill="#EAF4FB" stroke="#0EA5E9" stroke-width="1.5"/>
+  <text x="318" y="419" font-size="13" font-weight="bold" fill="#075985">Private app subnet · 10.0.10.0/24</text>
+  <rect x="785" y="400" width="422" height="292" rx="8" fill="#EAF4FB" stroke="#0EA5E9" stroke-width="1.5"/>
+  <text x="800" y="419" font-size="13" font-weight="bold" fill="#075985">Private app subnet · 10.0.11.0/24</text>
+  <text x="1194" y="419" font-size="11" text-anchor="end" fill="#075985">route 0.0.0.0/0 → NAT</text>
+
+  <!-- web tasks -->
+  <rect x="330" y="432" width="370" height="84" rx="8" fill="#FFFFFF" stroke="#ED7100" stroke-width="2"/>
+  <text x="345" y="456" font-size="15" font-weight="bold" fill="#111827">WEB TIER · Nginx + React (container)</text>
+  <text x="345" y="476" font-size="12.5" fill="#374151">ECS service eventra-web · port 80 · no public IP</text>
+  <text x="345" y="495" font-size="12.5" fill="#374151">serves static build, proxies /api → app tier</text>
+  <rect x="612" y="486" width="78" height="20" rx="10" fill="#FEE2E2" stroke="#B91C1C"/>
+  <text x="651" y="500" font-size="11" font-weight="bold" text-anchor="middle" fill="#991B1B">web-sg</text>
+
+  <rect x="812" y="432" width="370" height="84" rx="8" fill="#FFFFFF" stroke="#ED7100" stroke-width="2" stroke-dasharray="7 4"/>
+  <text x="827" y="456" font-size="15" font-weight="bold" fill="#111827">WEB TIER · extra task (scale-out)</text>
+  <text x="827" y="476" font-size="12.5" fill="#374151">added by auto scaling (1 → 3 tasks)</text>
+  <text x="827" y="495" font-size="12.5" fill="#374151">extra tasks may run on FARGATE_SPOT</text>
+
+  <!-- app tasks -->
+  <rect x="330" y="590" width="370" height="84" rx="8" fill="#FFFFFF" stroke="#ED7100" stroke-width="2"/>
+  <text x="345" y="614" font-size="15" font-weight="bold" fill="#111827">APP TIER · Node.js + Express API (container)</text>
+  <text x="345" y="634" font-size="12.5" fill="#374151">ECS service eventra-app · port 4000 · stateless (JWT)</text>
+  <text x="345" y="653" font-size="12.5" fill="#374151">secrets injected from Secrets Manager</text>
+  <rect x="612" y="644" width="78" height="20" rx="10" fill="#FEE2E2" stroke="#B91C1C"/>
+  <text x="651" y="658" font-size="11" font-weight="bold" text-anchor="middle" fill="#991B1B">app-sg</text>
+
+  <rect x="812" y="590" width="370" height="84" rx="8" fill="#FFFFFF" stroke="#ED7100" stroke-width="2" stroke-dasharray="7 4"/>
+  <text x="827" y="614" font-size="15" font-weight="bold" fill="#111827">APP TIER · extra task (scale-out)</text>
+  <text x="827" y="634" font-size="12.5" fill="#374151">target tracking: CPU 60%</text>
+  <text x="827" y="653" font-size="12.5" fill="#374151">min 1 · max 3 tasks per service</text>
+
+  <!-- request flow arrows -->
+  <line x1="640" y1="271" x2="640" y2="430" stroke="#232F3E" stroke-width="2.5" marker-end="url(#ah-dark)"/>
+  <text x="648" y="364" font-size="12" font-weight="bold" fill="#111827">:80</text>
+  <line x1="1000" y1="271" x2="1000" y2="430" stroke="#232F3E" stroke-width="2.5" marker-end="url(#ah-dark)"/>
+  <text x="1008" y="364" font-size="12" font-weight="bold" fill="#111827">:80</text>
+  <line x1="515" y1="516" x2="515" y2="588" stroke="#232F3E" stroke-width="2.5" marker-end="url(#ah-dark)"/>
+  <text x="525" y="548" font-size="12" font-weight="bold" fill="#111827">:4000 · Service Connect</text>
+  <text x="525" y="564" font-size="11.5" fill="#374151">http://app.eventra.local:4000</text>
+  <line x1="997" y1="516" x2="997" y2="588" stroke="#232F3E" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ah-dark)"/>
+  <text x="1022" y="543" font-size="12.5" font-weight="bold" fill="#C2410C">ECS cluster "eventra"</text>
+  <text x="1022" y="560" font-size="12" fill="#C2410C">on AWS Fargate (orange box)</text>
+  <text x="1022" y="576" font-size="12" fill="#C2410C">Service Connect: eventra.local</text>
+
+  <!-- outbound via NAT -->
+  <path d="M 360 432 L 360 340" fill="none" stroke="#C2410C" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ah-orange)"/>
+  <text x="368" y="364" font-size="11.5" fill="#C2410C">outbound HTTPS via NAT (ECR, secrets, logs)</text>
+
+  <!-- ===== DB subnets ===== -->
+  <rect x="303" y="730" width="422" height="196" rx="8" fill="#F5EFFA" stroke="#A855F7" stroke-width="1.5"/>
+  <text x="318" y="749" font-size="13" font-weight="bold" fill="#6B21A8">Private DB subnet · 10.0.20.0/24</text>
+  <rect x="785" y="730" width="422" height="196" rx="8" fill="#F5EFFA" stroke="#A855F7" stroke-width="1.5"/>
+  <text x="800" y="749" font-size="13" font-weight="bold" fill="#6B21A8">Private DB subnet · 10.0.21.0/24</text>
+  <text x="1194" y="749" font-size="11" text-anchor="end" fill="#6B21A8">local route only — no internet</text>
+
+  <rect x="330" y="772" width="370" height="130" rx="8" fill="#FFFFFF" stroke="#3B48CC" stroke-width="2.5"/>
+  <text x="345" y="797" font-size="15" font-weight="bold" fill="#1E3A8A">DATABASE TIER · Amazon RDS PostgreSQL 16</text>
+  <text x="345" y="818" font-size="12.5" fill="#374151">db.t4g.micro · storage encrypted · rds.force_ssl = 1</text>
+  <text x="345" y="837" font-size="12.5" fill="#374151">publicly accessible: No · automated backups</text>
+  <text x="345" y="856" font-size="12.5" fill="#374151">DB subnet group spans both AZs</text>
+  <rect x="612" y="872" width="78" height="20" rx="10" fill="#FEE2E2" stroke="#B91C1C"/>
+  <text x="651" y="886" font-size="11" font-weight="bold" text-anchor="middle" fill="#991B1B">db-sg</text>
+
+  <rect x="812" y="772" width="370" height="130" rx="8" fill="#FFFFFF" stroke="#3B48CC" stroke-width="2" stroke-dasharray="7 4"/>
+  <text x="827" y="797" font-size="15" font-weight="bold" fill="#1E3A8A">RDS standby (optional)</text>
+  <text x="827" y="818" font-size="12.5" fill="#374151">db_multi_az = true → synchronous standby</text>
+  <text x="827" y="837" font-size="12.5" fill="#374151">with automatic failover (off to save cost)</text>
+
+  <line x1="515" y1="674" x2="515" y2="770" stroke="#232F3E" stroke-width="2.5" marker-end="url(#ah-dark)"/>
+  <text x="525" y="720" font-size="12" font-weight="bold" fill="#111827">:5432 · TLS</text>
+
+  <!-- security group chain note -->
+  <rect x="303" y="944" width="904" height="100" rx="8" fill="#FFF5F5" stroke="#FCA5A5" stroke-width="1.5"/>
+  <text x="318" y="967" font-size="13.5" font-weight="bold" fill="#991B1B">Security groups — least privilege, each tier accepts only the tier in front of it</text>
+  <text x="318" y="990" font-size="13" fill="#111827">Internet ─80→ alb-sg ─80→ web-sg ─4000→ app-sg ─5432→ db-sg   (db-sg has no outbound rules)</text>
+  <text x="318" y="1012" font-size="13" fill="#111827">Only the ALB and NAT instance sit in public subnets; web/app tasks have no public IP; RDS has no internet route.</text>
+  <text x="318" y="1033" font-size="13" fill="#111827">Web/app egress: 443 → NAT (ECR, Secrets Manager, CloudWatch) · web → app 4000 · app → db 5432.</text>
+
+  <!-- ===== Regional services column ===== -->
+  <text x="1475" y="146" font-size="14" font-weight="bold" text-anchor="middle" fill="#232F3E">Regional AWS services</text>
+
+  <rect x="1285" y="160" width="380" height="74" rx="8" fill="#FFF7ED" stroke="#ED7100" stroke-width="2"/>
+  <text x="1300" y="184" font-size="14.5" font-weight="bold" fill="#9A3412">Amazon ECR (container registry)</text>
+  <text x="1300" y="204" font-size="12.5" fill="#374151">repos eventra-web, eventra-app · tag = commit SHA</text>
+  <text x="1300" y="222" font-size="12.5" fill="#374151">scan on push · lifecycle keeps 10 images</text>
+
+  <rect x="1285" y="250" width="380" height="74" rx="8" fill="#FEF2F2" stroke="#DD344C" stroke-width="2"/>
+  <text x="1300" y="274" font-size="14.5" font-weight="bold" fill="#9F1239">AWS Secrets Manager</text>
+  <text x="1300" y="294" font-size="12.5" fill="#374151">secret eventra/app: DB host/user/password,</text>
+  <text x="1300" y="312" font-size="12.5" fill="#374151">JWT secret, admin login → injected at task start</text>
+
+  <rect x="1285" y="340" width="380" height="74" rx="8" fill="#FDF2F8" stroke="#E7157B" stroke-width="2"/>
+  <text x="1300" y="364" font-size="14.5" font-weight="bold" fill="#9D174D">Amazon CloudWatch + SNS</text>
+  <text x="1300" y="384" font-size="12.5" fill="#374151">logs /ecs/eventra (7 days) · dashboard eventra-overview</text>
+  <text x="1300" y="402" font-size="12.5" fill="#374151">4 alarms (5xx, unhealthy targets, CPU) → email</text>
+
+  <rect x="1285" y="430" width="380" height="74" rx="8" fill="#FEF2F2" stroke="#DD344C" stroke-width="2"/>
+  <text x="1300" y="454" font-size="14.5" font-weight="bold" fill="#9F1239">AWS IAM (least privilege)</text>
+  <text x="1300" y="474" font-size="12.5" fill="#374151">GitHub OIDC provider + deploy role (repo + main only)</text>
+  <text x="1300" y="492" font-size="12.5" fill="#374151">ECS execution role (1 secret) · task role (no perms)</text>
+
+  <rect x="1285" y="520" width="380" height="74" rx="8" fill="#FFF1F2" stroke="#E7157B" stroke-width="2"/>
+  <text x="1300" y="544" font-size="14.5" font-weight="bold" fill="#9D174D">Application Auto Scaling</text>
+  <text x="1300" y="564" font-size="12.5" fill="#374151">target tracking per service: CPU 60%,</text>
+  <text x="1300" y="582" font-size="12.5" fill="#374151">web also ALB requests/target 500 · min 1 max 3</text>
+
+  <rect x="1285" y="610" width="380" height="74" rx="8" fill="#FFF7ED" stroke="#ED7100" stroke-width="2"/>
+  <text x="1300" y="634" font-size="14.5" font-weight="bold" fill="#9A3412">AWS Cloud Map (Service Connect)</text>
+  <text x="1300" y="654" font-size="12.5" fill="#374151">private namespace eventra.local</text>
+  <text x="1300" y="672" font-size="12.5" fill="#374151">app tier reachable only inside the cluster</text>
+
+  <!-- links from cluster to services -->
+  <line x1="1234" y1="460" x2="1283" y2="300" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ah-gray)"/>
+  <line x1="1234" y1="480" x2="1283" y2="380" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ah-gray)"/>
+  <line x1="1234" y1="560" x2="1283" y2="557" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ah-gray)"/>
+
+  <!-- ===== Legend ===== -->
+  <rect x="1285" y="720" width="380" height="324" rx="8" fill="#F9FAFB" stroke="#D1D5DB" stroke-width="1.5"/>
+  <text x="1300" y="744" font-size="14" font-weight="bold" fill="#111827">Legend</text>
+  <line x1="1300" y1="768" x2="1350" y2="768" stroke="#232F3E" stroke-width="2.5" marker-end="url(#ah-dark)"/>
+  <text x="1362" y="772" font-size="12.5" fill="#111827">user request path (port shown)</text>
+  <line x1="1300" y1="796" x2="1350" y2="796" stroke="#C2410C" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ah-orange)"/>
+  <text x="1362" y="800" font-size="12.5" fill="#111827">outbound-only traffic via NAT instance</text>
+  <line x1="1300" y1="824" x2="1350" y2="824" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ah-blue)"/>
+  <text x="1362" y="828" font-size="12.5" fill="#111827">CI/CD (GitHub Actions → AWS)</text>
+  <line x1="1300" y1="852" x2="1350" y2="852" stroke="#6B7280" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#ah-gray)"/>
+  <text x="1362" y="856" font-size="12.5" fill="#111827">uses service (logs, secrets, scaling)</text>
+  <rect x="1300" y="870" width="50" height="18" rx="9" fill="#FEE2E2" stroke="#B91C1C"/>
+  <text x="1362" y="884" font-size="12.5" fill="#111827">security group (firewall per tier)</text>
+  <rect x="1300" y="898" width="50" height="18" fill="#EEF7E8" stroke="#7AA116"/>
+  <text x="1362" y="912" font-size="12.5" fill="#111827">public subnet</text>
+  <rect x="1300" y="924" width="50" height="18" fill="#EAF4FB" stroke="#0EA5E9"/>
+  <text x="1362" y="938" font-size="12.5" fill="#111827">private app subnet (via NAT)</text>
+  <rect x="1300" y="950" width="50" height="18" fill="#F5EFFA" stroke="#A855F7"/>
+  <text x="1362" y="964" font-size="12.5" fill="#111827">private DB subnet (no internet)</text>
+  <rect x="1300" y="976" width="50" height="18" fill="#FFFFFF" stroke="#ED7100" stroke-dasharray="6 3"/>
+  <text x="1362" y="990" font-size="12.5" fill="#111827">scale-out capacity / optional standby</text>
+  <text x="1300" y="1020" font-size="12" fill="#4B5563">IaC: infra/terraform · pipeline: .github/workflows/ci-cd.yml</text>
+
+  <!-- ===== GitHub (outside AWS) ===== -->
+  <rect x="1715" y="160" width="170" height="70" rx="10" fill="#F3F4F6" stroke="#374151" stroke-width="2"/>
+  <text x="1800" y="190" font-size="15" font-weight="bold" text-anchor="middle" fill="#111827">Developer</text>
+  <text x="1800" y="210" font-size="12.5" text-anchor="middle" fill="#374151">git push → main</text>
+  <line x1="1800" y1="230" x2="1800" y2="262" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ah-blue)"/>
+
+  <rect x="1715" y="264" width="170" height="420" rx="10" fill="#EFF6FF" stroke="#1D4ED8" stroke-width="2"/>
+  <text x="1800" y="290" font-size="14.5" font-weight="bold" text-anchor="middle" fill="#1E3A8A">GitHub Actions</text>
+  <text x="1800" y="308" font-size="12" text-anchor="middle" fill="#1E3A8A">ci-cd.yml</text>
+  <text x="1728" y="338" font-size="12" fill="#111827">1 Backend tests</text>
+  <text x="1740" y="354" font-size="11" fill="#4B5563">(Jest + Postgres)</text>
+  <text x="1728" y="378" font-size="12" fill="#111827">2 Frontend lint + build</text>
+  <text x="1728" y="402" font-size="12" fill="#111827">3 Terraform validate</text>
+  <text x="1728" y="426" font-size="12" fill="#111827">4 Docker build ×2</text>
+  <text x="1728" y="456" font-size="12" font-weight="bold" fill="#1E3A8A">Deploy (main):</text>
+  <text x="1728" y="478" font-size="12" fill="#111827">5 OIDC → IAM role</text>
+  <text x="1740" y="494" font-size="11" fill="#4B5563">(no stored AWS keys)</text>
+  <text x="1728" y="518" font-size="12" fill="#111827">6 Push images → ECR</text>
+  <text x="1728" y="542" font-size="12" fill="#111827">7 New task definition</text>
+  <text x="1728" y="566" font-size="12" fill="#111827">8 Rolling ECS deploy</text>
+  <text x="1740" y="582" font-size="11" fill="#4B5563">(circuit-breaker rollback)</text>
+  <text x="1728" y="606" font-size="12" fill="#111827">9 Smoke test</text>
+  <text x="1740" y="622" font-size="11" fill="#4B5563">/api/health via ALB</text>
+
+  <line x1="1713" y1="197" x2="1667" y2="197" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ah-blue)"/>
+  <line x1="1713" y1="197" x2="1713" y2="300" stroke="#1D4ED8" stroke-width="0"/>
+  <text x="1690" y="186" font-size="11" text-anchor="middle" fill="#1D4ED8">push</text>
+  <line x1="1713" y1="467" x2="1667" y2="467" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ah-blue)"/>
+  <text x="1690" y="456" font-size="11" text-anchor="middle" fill="#1D4ED8">OIDC</text>
+  <path d="M 1800 684 L 1800 706 L 1250 706 L 1250 640 L 1236 640" fill="none" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#ah-blue)"/>
+  <text x="1525" y="700" font-size="12" text-anchor="middle" fill="#1D4ED8">update ECS services (new task definition revision)</text>
+</svg>

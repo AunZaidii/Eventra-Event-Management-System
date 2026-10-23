@@ -1,10 +1,11 @@
 # Eventra web tier: serves the React build and forwards /api to the backend.
-# ${BACKEND_URL} is filled in from the environment when the container starts
-# (default http://app:4000 in docker-compose; set to the API's address on AWS).
+# ${BACKEND_URL} is filled in from the environment when the container starts:
+#   docker-compose: http://app:4000
+#   AWS ECS:        http://app.eventra.local:4000 (ECS Service Connect, private to the VPC)
 
 server {
+    # IPv4 only: an IPv6 listen line fails on hosts where IPv6 is disabled
     listen 80;
-    listen [::]:80;
     server_name _;
     server_tokens off;
 
