@@ -260,9 +260,9 @@ Event Management System/
 │   ├── nginx/default.conf.template  # SPA + /api proxy (backend URL from env)
 │   ├── Dockerfile
 │   └── .dockerignore
-├── infra/aws/
-│   ├── task-definition-app.json   # ECS Fargate task defs (secrets from Secrets Manager)
-│   └── task-definition-web.json
+├── infra/
+│   ├── terraform/                 # AWS infrastructure as code (VPC, ALB, ECS, RDS, ECR, IAM, monitoring)
+│   └── collect-evidence.sh        # AWS CLI evidence for the report
 ├── .github/workflows/ci-cd.yml
 ├── docs/  spec.md · design.md · test-report.md · deploy-plan.md
 ├── docker-compose.yml
