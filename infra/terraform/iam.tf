@@ -59,6 +59,9 @@ data "aws_iam_openid_connect_provider" "github" {
 }
 
 locals {
+  github_owner = split("/", var.github_repository)[0]
+  github_repo  = split("/", var.github_repository)[1]
+
   github_oidc_provider_arn = var.create_github_oidc_provider ? aws_iam_openid_connect_provider.github[0].arn : data.aws_iam_openid_connect_provider.github[0].arn
 }
 
@@ -75,12 +78,16 @@ data "aws_iam_policy_document" "github_assume" {
       values   = ["sts.amazonaws.com"]
     }
     # Only this repository, and only the main branch / production environment, may deploy.
+    # GitHub sends the subject either as "repo:owner/name:..." or, in its newer format,
+    # with immutable IDs: "repo:owner@<ownerId>/name@<repoId>:..." — accept both.
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       values = [
         "repo:${var.github_repository}:ref:refs/heads/main",
         "repo:${var.github_repository}:environment:production",
+        "repo:${local.github_owner}@*/${local.github_repo}@*:ref:refs/heads/main",
+        "repo:${local.github_owner}@*/${local.github_repo}@*:environment:production",
       ]
     }
   }
