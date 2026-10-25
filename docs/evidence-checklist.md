@@ -16,7 +16,7 @@ Save each screenshot in **`docs/evidence/screenshots/`** with the **exact file n
 | 3 | `03-route-tables.png` | **VPC** → *Route tables* → select `eventra-rt-public` → *Routes* tab | `0.0.0.0/0 → igw-…` (Internet Gateway) |
 | 4 | `04-route-table-private.png` | Same page → select `eventra-rt-private-app` → *Routes* tab | `0.0.0.0/0 → eni-…` (the NAT instance). Optional extra: `eventra-rt-private-db` showing only the `local` route |
 | 5 | `05-internet-gateway.png` | **VPC** → *Internet gateways* | `eventra-igw`, State *Attached*, VPC `eventra-vpc` |
-| 6 | `06-nat-instance.png` | **EC2** → *Instances* → `eventra-nat-instance` | Running, type **t4g.nano**, public IPv4, public subnet |
+| 6 | `06-nat-instance.png` | **EC2** → *Instances* → `eventra-nat-instance` | Running, type **t4g.micro**, public IPv4, public subnet |
 | 7 | `07-ecs-cluster.png` | **ECS** → *Clusters* → `eventra` → *Services* tab | `eventra-web` and `eventra-app`, status *Active*, tasks **Running = Desired** |
 | 8 | `08-ecs-tasks.png` | **ECS** → `eventra` → *Tasks* tab | Running tasks, *Healthy*, launch type/capacity provider **FARGATE** |
 | 9 | `09-ecs-service-connect.png` | **ECS** → `eventra` → `eventra-app` → *Configuration and networking* (scroll to **Service Connect**) | Discovery name `app`, endpoint `app.eventra.local:4000`, private subnets, `assign public IP: Off` |

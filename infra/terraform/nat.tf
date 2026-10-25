@@ -1,5 +1,5 @@
-# NAT instance: a t4g.nano that forwards outbound traffic from the private app subnets.
-# Cost optimization: ~$3/month instead of ~$33/month for a managed NAT Gateway.
+# NAT instance: a t4g.micro that forwards outbound traffic from the private app subnets.
+# Cost optimization: ~$6/month instead of ~$33/month for a managed NAT Gateway.
 # Trade-off (documented in the report): it is a single instance in one AZ, so it is
 # not highly available. Swap for aws_nat_gateway in production.
 

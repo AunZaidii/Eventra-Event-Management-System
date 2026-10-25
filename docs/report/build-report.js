@@ -159,7 +159,7 @@ body.push(
   bullet('**Two Availability Zones** with three subnet layers (public, private-app, private-db) for segmentation and resilience.'),
   bullet('**ECS Fargate** instead of EC2 instances: no servers to patch, per-task billing, native auto scaling and rolling deployments.'),
   bullet('**Stateless application** (JWT authentication, no sessions or local files) so any number of tasks can serve any request.'),
-  bullet('**Cost-optimized outbound access** through a NAT instance (t4g.nano) instead of a managed NAT Gateway (≈ $3 vs ≈ $33/month), with the availability trade-off documented in §8.'),
+  bullet('**Cost-optimized outbound access** through a NAT instance (t4g.micro) instead of a managed NAT Gateway (≈ $6 vs ≈ $33/month), with the availability trade-off documented in §8.'),
   bullet('**Terraform** as infrastructure-as-code; the pipeline only swaps image versions, so infrastructure and deployments never drift.'),
 );
 
@@ -169,7 +169,7 @@ body.push(
   table(
     ['Tier / area', 'AWS service', 'Role in Eventra'],
     [
-      ['Network', 'VPC 10.0.0.0/16, 6 subnets in 2 AZs, Internet Gateway, 3 route tables, NAT instance (EC2 t4g.nano)', 'Public subnets for ALB and NAT; private-app subnets (default route → NAT) for containers; private-db subnets with only the local route'],
+      ['Network', 'VPC 10.0.0.0/16, 6 subnets in 2 AZs, Internet Gateway, 3 route tables, NAT instance (EC2 t4g.micro)', 'Public subnets for ALB and NAT; private-app subnets (default route → NAT) for containers; private-db subnets with only the local route'],
       ['Web tier', 'Application Load Balancer + target group (IP), ECS Fargate service eventra-web', 'Public entry point on HTTP :80; Nginx serves the React build and reverse-proxies /api'],
       ['Application tier', 'ECS Fargate service eventra-app, ECS Service Connect / AWS Cloud Map', 'REST API (validation, business rules, JWT auth, CSV export) on port 4000, discoverable only as app.eventra.local'],
       ['Database tier', 'Amazon RDS for PostgreSQL 16 (db.t4g.micro)', 'Events, registrations and admins; encrypted, TLS-only, not publicly accessible'],
@@ -269,7 +269,7 @@ body.push(
       ['Security', 'Segmented subnets, chained least-privilege security groups, Secrets Manager, OIDC (no CI keys), TLS to the database, encryption at rest, app-level hardening (see §6).', 'HTTP only → ACM certificate + HTTPS listener, AWS WAF; pin RDS CA.'],
       ['Maintainability / Deployability', 'Identical containers locally, in CI and on ECS; automated test → build → push → rolling deploy → smoke test on every push; SHA-tagged immutable images; one-command IaC.', 'No staging environment → Terraform workspace per environment with approval gate.'],
       ['Performance / Latency', 'Nginx gzip and immutable caching of hashed assets; code-split admin bundle; indexed SQL; all tiers in one region/VPC; scaling before saturation; p50/p95 latency on the dashboard.', 'No CDN or cache → CloudFront, ElastiCache.'],
-      ['Cost-Efficiency', '≈ $65/month vs ≈ $127 for the standard HA layout: NAT instance, smallest Fargate size, Spot for scaled tasks, Graviton for NAT/RDS, log retention and ECR lifecycle, terraform destroy when idle.', 'Savings trade availability (see above).'],
+      ['Cost-Efficiency', '≈ $68/month vs ≈ $127 for the standard HA layout: NAT instance, smallest Fargate size, Spot for scaled tasks, Graviton for NAT/RDS, log retention and ECR lifecycle, terraform destroy when idle.', 'Savings trade availability (see above).'],
       ['Portability', 'OCI images, 12-factor env configuration, standard PostgreSQL, docker-compose runs anywhere; only Terraform and the deploy job are AWS-specific.', 'Kubernetes manifests/Helm for provider-neutral deployment.'],
     ],
     [1700, 4626, 2700],
@@ -285,16 +285,16 @@ body.push(
     [
       ['Application Load Balancer', '1 ALB, ~1 LCU', '17.4'],
       ['ECS Fargate', '2 tasks × 0.25 vCPU / 0.5 GB, 24×7', '18.0'],
-      ['NAT instance', 'EC2 t4g.nano + 8 GB gp3', '3.7'],
+      ['NAT instance', 'EC2 t4g.micro + 8 GB gp3', '6.8'],
       ['Public IPv4', '3 addresses (NAT + 2 ALB nodes)', '11.0'],
       ['RDS PostgreSQL', 'db.t4g.micro single-AZ, 20 GB gp3', '14.0'],
       ['Secrets Manager, CloudWatch, Cloud Map, ECR', '1 secret, ~0.3 GB logs, 4 alarms, 0.5 GB images', '1.2'],
-      ['**Total**', 'us-east-1 on-demand, low traffic', '**≈ 65 (≈ 2.2 / day)**'],
+      ['**Total**', 'us-east-1 on-demand, low traffic', '**≈ 68 (≈ 2.25 / day)**'],
     ],
     [3000, 4126, 1900],
   ),
   spacer(),
-  p(`Estimate checked with the AWS Pricing Calculator: ${pricingLink}. **Implemented optimizations:** (1) NAT instance instead of NAT Gateway (–$30/month); (2) right-sized Fargate tasks with a minimum of one per tier and automatic scale-in; (3) FARGATE_SPOT for scaled-out tasks (up to 70% cheaper); (4) Graviton t4g instances for NAT and RDS; (5) 7-day log retention and ECR lifecycle rules; (6) terraform destroy between demonstrations. **Proposed:** ARM64 Fargate images (–20%), scheduled scale-to-zero for non-production, Savings Plans/Reserved Instances for long-running production, and S3 + CloudFront for static assets.`),
+  p(`Estimate checked with the AWS Pricing Calculator: ${pricingLink}. **Implemented optimizations:** (1) NAT instance instead of NAT Gateway (–$27/month); (2) right-sized Fargate tasks with a minimum of one per tier and automatic scale-in; (3) FARGATE_SPOT for scaled-out tasks (up to 70% cheaper); (4) Graviton t4g instances for NAT and RDS; (5) 7-day log retention and ECR lifecycle rules; (6) terraform destroy between demonstrations. **Proposed:** ARM64 Fargate images (–20%), scheduled scale-to-zero for non-production, Savings Plans/Reserved Instances for long-running production, and S3 + CloudFront for static assets.`),
 );
 
 // 10
@@ -312,7 +312,7 @@ const evidence = [
     ['03-route-tables.png', 'Public route table: 0.0.0.0/0 → Internet Gateway'],
     ['04-route-table-private.png', 'Private app route table: 0.0.0.0/0 → NAT instance'],
     ['05-internet-gateway.png', 'Internet Gateway attached to the VPC'],
-    ['06-nat-instance.png', 'NAT instance (t4g.nano) in the public subnet'],
+    ['06-nat-instance.png', 'NAT instance (t4g.micro) in the public subnet'],
   ]],
   ['Compute / containers', [
     ['07-ecs-cluster.png', 'ECS cluster with the web and app services'],

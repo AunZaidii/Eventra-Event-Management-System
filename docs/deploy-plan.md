@@ -8,7 +8,7 @@ This is a step-by-step guide to take Eventra from the repo to a live, load-balan
 | **Cloud** | AWS, region `us-east-1` (N. Virginia) |
 | **Infrastructure as code** | Terraform in [infra/terraform/](../infra/terraform) |
 | **Pipeline** | GitHub Actions [.github/workflows/ci-cd.yml](../.github/workflows/ci-cd.yml) |
-| **Estimated cost** | about **$2.20 per day** while running (see [cost-estimate.md](cost-estimate.md)). Destroy it when you're done |
+| **Estimated cost** | about **$2.25 per day** while running (see [cost-estimate.md](cost-estimate.md)). Destroy it when you're done |
 
 ---
 

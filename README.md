@@ -186,7 +186,7 @@ terraform destroy          # remove everything when finished
 |---|---|
 | [docs/deploy-plan.md](docs/deploy-plan.md) | Step-by-step: AWS setup, GitHub variables, first deploy, evidence, teardown |
 | [docs/evidence-checklist.md](docs/evidence-checklist.md) | The 29 deployment screenshots to take, with exact console pages and file names |
-| [docs/cost-estimate.md](docs/cost-estimate.md) | Monthly cost (≈ $65), pricing-calculator inputs, optimizations |
+| [docs/cost-estimate.md](docs/cost-estimate.md) | Monthly cost (≈ $68), pricing-calculator inputs, optimizations |
 | [docs/nfr.md](docs/nfr.md) | Non-functional requirements justification |
 | [docs/report/](docs/report) | `node build-report.js` builds the Word technical report with the screenshots |
 

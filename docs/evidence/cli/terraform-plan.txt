@@ -1,0 +1,2020 @@
+﻿data.aws_availability_zones.available: Reading...
+data.aws_caller_identity.current: Reading...
+data.aws_iam_policy_document.ecs_tasks_assume: Reading...
+data.aws_ssm_parameter.al2023_arm64: Reading...
+data.aws_iam_policy_document.ecs_tasks_assume: Read complete after 0s [id=1077804475]
+data.aws_caller_identity.current: Read complete after 0s [id=988710971825]
+data.aws_availability_zones.available: Read complete after 1s [id=us-east-1]
+data.aws_ssm_parameter.al2023_arm64: Read complete after 1s [id=/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-arm64]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+ <= read (data resources)
+
+Terraform will perform the following actions:
+
+  # data.aws_iam_policy_document.github_assume will be read during apply
+  # (config refers to values not yet known)
+ <= data "aws_iam_policy_document" "github_assume" {
+      + id            = (known after apply)
+      + json          = (known after apply)
+      + minified_json = (known after apply)
+
+      + statement {
+          + actions = [
+              + "sts:AssumeRoleWithWebIdentity",
+            ]
+
+          + condition {
+              + test     = "StringEquals"
+              + values   = [
+                  + "sts.amazonaws.com",
+                ]
+              + variable = "token.actions.githubusercontent.com:aud"
+            }
+          + condition {
+              + test     = "StringLike"
+              + values   = [
+                  + "repo:AunZaidii/Eventra-Event-Management-System:ref:refs/heads/main",
+                  + "repo:AunZaidii/Eventra-Event-Management-System:environment:production",
+                ]
+              + variable = "token.actions.githubusercontent.com:sub"
+            }
+
+          + principals {
+              + identifiers = [
+                  + (known after apply),
+                ]
+              + type        = "Federated"
+            }
+        }
+    }
+
+  # data.aws_iam_policy_document.github_deploy will be read during apply
+  # (config refers to values not yet known)
+ <= data "aws_iam_policy_document" "github_deploy" {
+      + id            = (known after apply)
+      + json          = (known after apply)
+      + minified_json = (known after apply)
+
+      + statement {
+          + actions   = [
+              + "ecr:GetAuthorizationToken",
+            ]
+          + resources = [
+              + "*",
+            ]
+          + sid       = "EcrLogin"
+        }
+      + statement {
+          + actions   = [
+              + "ecr:BatchCheckLayerAvailability",
+              + "ecr:BatchGetImage",
+              + "ecr:CompleteLayerUpload",
+              + "ecr:GetDownloadUrlForLayer",
+              + "ecr:InitiateLayerUpload",
+              + "ecr:PutImage",
+              + "ecr:UploadLayerPart",
+            ]
+          + resources = [
+              + (known after apply),
+              + (known after apply),
+            ]
+          + sid       = "PushToEventraRepositoriesOnly"
+        }
+      + statement {
+          + actions   = [
+              + "ecs:DescribeTaskDefinition",
+              + "ecs:RegisterTaskDefinition",
+            ]
+          + resources = [
+              + "*",
+            ]
+          + sid       = "TaskDefinitions"
+        }
+      + statement {
+          + actions   = [
+              + "elasticloadbalancing:DescribeLoadBalancers",
+            ]
+          + resources = [
+              + "*",
+            ]
+          + sid       = "FindLoadBalancerForSmokeTest"
+        }
+      + statement {
+          + actions   = [
+              + "ecs:DescribeServices",
+              + "ecs:UpdateService",
+            ]
+          + resources = [
+              + (known after apply),
+              + (known after apply),
+            ]
+          + sid       = "UpdateEventraServicesOnly"
+        }
+      + statement {
+          + actions   = [
+              + "iam:PassRole",
+            ]
+          + resources = [
+              + (known after apply),
+              + (known after apply),
+            ]
+          + sid       = "PassOnlyTheEcsRoles"
+
+          + condition {
+              + test     = "StringEquals"
+              + values   = [
+                  + "ecs-tasks.amazonaws.com",
+                ]
+              + variable = "iam:PassedToService"
+            }
+        }
+    }
+
+  # data.aws_iam_policy_document.read_app_secret will be read during apply
+  # (config refers to values not yet known)
+ <= data "aws_iam_policy_document" "read_app_secret" {
+      + id            = (known after apply)
+      + json          = (known after apply)
+      + minified_json = (known after apply)
+
+      + statement {
+          + actions   = [
+              + "secretsmanager:GetSecretValue",
+            ]
+          + resources = [
+              + (known after apply),
+            ]
+          + sid       = "ReadOnlyTheEventraSecret"
+        }
+    }
+
+  # aws_appautoscaling_policy.cpu["app"] will be created
+  + resource "aws_appautoscaling_policy" "cpu" {
+      + alarm_arns         = (known after apply)
+      + arn                = (known after apply)
+      + id                 = (known after apply)
+      + name               = "eventra-app-cpu-target"
+      + policy_type        = "TargetTrackingScaling"
+      + resource_id        = "service/eventra/eventra-app"
+      + scalable_dimension = "ecs:service:DesiredCount"
+      + service_namespace  = "ecs"
+
+      + target_tracking_scaling_policy_configuration {
+          + disable_scale_in   = false
+          + scale_in_cooldown  = 180
+          + scale_out_cooldown = 60
+          + target_value       = 60
+
+          + predefined_metric_specification {
+              + predefined_metric_type = "ECSServiceAverageCPUUtilization"
+            }
+        }
+    }
+
+  # aws_appautoscaling_policy.cpu["web"] will be created
+  + resource "aws_appautoscaling_policy" "cpu" {
+      + alarm_arns         = (known after apply)
+      + arn                = (known after apply)
+      + id                 = (known after apply)
+      + name               = "eventra-web-cpu-target"
+      + policy_type        = "TargetTrackingScaling"
+      + resource_id        = "service/eventra/eventra-web"
+      + scalable_dimension = "ecs:service:DesiredCount"
+      + service_namespace  = "ecs"
+
+      + target_tracking_scaling_policy_configuration {
+          + disable_scale_in   = false
+          + scale_in_cooldown  = 180
+          + scale_out_cooldown = 60
+          + target_value       = 60
+
+          + predefined_metric_specification {
+              + predefined_metric_type = "ECSServiceAverageCPUUtilization"
+            }
+        }
+    }
+
+  # aws_appautoscaling_policy.web_requests will be created
+  + resource "aws_appautoscaling_policy" "web_requests" {
+      + alarm_arns         = (known after apply)
+      + arn                = (known after apply)
+      + id                 = (known after apply)
+      + name               = "eventra-web-requests-target"
+      + policy_type        = "TargetTrackingScaling"
+      + resource_id        = "service/eventra/eventra-web"
+      + scalable_dimension = "ecs:service:DesiredCount"
+      + service_namespace  = "ecs"
+
+      + target_tracking_scaling_policy_configuration {
+          + disable_scale_in   = false
+          + scale_in_cooldown  = 180
+          + scale_out_cooldown = 60
+          + target_value       = 500
+
+          + predefined_metric_specification {
+              + predefined_metric_type = "ALBRequestCountPerTarget"
+              + resource_label         = (known after apply)
+            }
+        }
+    }
+
+  # aws_appautoscaling_target.service["app"] will be created
+  + resource "aws_appautoscaling_target" "service" {
+      + arn                = (known after apply)
+      + id                 = (known after apply)
+      + max_capacity       = 3
+      + min_capacity       = 1
+      + resource_id        = "service/eventra/eventra-app"
+      + role_arn           = (known after apply)
+      + scalable_dimension = "ecs:service:DesiredCount"
+      + service_namespace  = "ecs"
+      + tags_all           = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+
+      + suspended_state (known after apply)
+    }
+
+  # aws_appautoscaling_target.service["web"] will be created
+  + resource "aws_appautoscaling_target" "service" {
+      + arn                = (known after apply)
+      + id                 = (known after apply)
+      + max_capacity       = 3
+      + min_capacity       = 1
+      + resource_id        = "service/eventra/eventra-web"
+      + role_arn           = (known after apply)
+      + scalable_dimension = "ecs:service:DesiredCount"
+      + service_namespace  = "ecs"
+      + tags_all           = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+
+      + suspended_state (known after apply)
+    }
+
+  # aws_cloudwatch_dashboard.main will be created
+  + resource "aws_cloudwatch_dashboard" "main" {
+      + dashboard_arn  = (known after apply)
+      + dashboard_body = (known after apply)
+      + dashboard_name = "eventra-overview"
+      + id             = (known after apply)
+    }
+
+  # aws_cloudwatch_log_group.ecs will be created
+  + resource "aws_cloudwatch_log_group" "ecs" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + log_group_class   = (known after apply)
+      + name              = "/ecs/eventra"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 7
+      + skip_destroy      = false
+      + tags_all          = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+    }
+
+  # aws_cloudwatch_metric_alarm.alb_5xx will be created
+  + resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "More than 5 server errors (5xx) from the web tier in 5 minutes"
+      + alarm_name                            = "eventra-alb-5xx"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = (known after apply)
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 1
+      + id                                    = (known after apply)
+      + metric_name                           = "HTTPCode_Target_5XX_Count"
+      + namespace                             = "AWS/ApplicationELB"
+      + ok_actions                            = (known after apply)
+      + period                                = 300
+      + statistic                             = "Sum"
+      + tags_all                              = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + threshold                             = 5
+      + treat_missing_data                    = "notBreaching"
+    }
+
+  # aws_cloudwatch_metric_alarm.app_cpu_high will be created
+  + resource "aws_cloudwatch_metric_alarm" "app_cpu_high" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "App tier CPU above 85% for 10 minutes (auto scaling may be at its maximum)"
+      + alarm_name                            = "eventra-app-cpu-high"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = {
+          + "ClusterName" = "eventra"
+          + "ServiceName" = "eventra-app"
+        }
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 2
+      + id                                    = (known after apply)
+      + metric_name                           = "CPUUtilization"
+      + namespace                             = "AWS/ECS"
+      + period                                = 300
+      + statistic                             = "Average"
+      + tags_all                              = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + threshold                             = 85
+      + treat_missing_data                    = "missing"
+    }
+
+  # aws_cloudwatch_metric_alarm.db_cpu_high will be created
+  + resource "aws_cloudwatch_metric_alarm" "db_cpu_high" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "Database CPU above 80% for 10 minutes"
+      + alarm_name                            = "eventra-db-cpu-high"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = {
+          + "DBInstanceIdentifier" = "eventra-db"
+        }
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 2
+      + id                                    = (known after apply)
+      + metric_name                           = "CPUUtilization"
+      + namespace                             = "AWS/RDS"
+      + period                                = 300
+      + statistic                             = "Average"
+      + tags_all                              = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + threshold                             = 80
+      + treat_missing_data                    = "missing"
+    }
+
+  # aws_cloudwatch_metric_alarm.unhealthy_targets will be created
+  + resource "aws_cloudwatch_metric_alarm" "unhealthy_targets" {
+      + actions_enabled                       = true
+      + alarm_actions                         = (known after apply)
+      + alarm_description                     = "At least one web task is failing its load balancer health check"
+      + alarm_name                            = "eventra-unhealthy-web-targets"
+      + arn                                   = (known after apply)
+      + comparison_operator                   = "GreaterThanThreshold"
+      + dimensions                            = (known after apply)
+      + evaluate_low_sample_count_percentiles = (known after apply)
+      + evaluation_periods                    = 3
+      + id                                    = (known after apply)
+      + metric_name                           = "UnHealthyHostCount"
+      + namespace                             = "AWS/ApplicationELB"
+      + ok_actions                            = (known after apply)
+      + period                                = 60
+      + statistic                             = "Maximum"
+      + tags_all                              = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + threshold                             = 0
+      + treat_missing_data                    = "notBreaching"
+    }
+
+  # aws_db_instance.main will be created
+  + resource "aws_db_instance" "main" {
+      + address                               = (known after apply)
+      + allocated_storage                     = 20
+      + apply_immediately                     = true
+      + arn                                   = (known after apply)
+      + auto_minor_version_upgrade            = true
+      + availability_zone                     = (known after apply)
+      + backup_retention_period               = 1
+      + backup_target                         = (known after apply)
+      + backup_window                         = "03:00-03:30"
+      + ca_cert_identifier                    = (known after apply)
+      + character_set_name                    = (known after apply)
+      + copy_tags_to_snapshot                 = true
+      + database_insights_mode                = (known after apply)
+      + db_name                               = "eventra"
+      + db_subnet_group_name                  = "eventra-db-subnets"
+      + dedicated_log_volume                  = false
+      + delete_automated_backups              = true
+      + deletion_protection                   = false
+      + domain_fqdn                           = (known after apply)
+      + enabled_cloudwatch_logs_exports       = [
+          + "postgresql",
+        ]
+      + endpoint                              = (known after apply)
+      + engine                                = "postgres"
+      + engine_lifecycle_support              = (known after apply)
+      + engine_version                        = "16"
+      + engine_version_actual                 = (known after apply)
+      + hosted_zone_id                        = (known after apply)
+      + id                                    = (known after apply)
+      + identifier                            = "eventra-db"
+      + identifier_prefix                     = (known after apply)
+      + instance_class                        = "db.t4g.micro"
+      + iops                                  = (known after apply)
+      + kms_key_id                            = (known after apply)
+      + latest_restorable_time                = (known after apply)
+      + license_model                         = (known after apply)
+      + listener_endpoint                     = (known after apply)
+      + maintenance_window                    = "sun:04:00-sun:04:30"
+      + master_user_secret                    = (known after apply)
+      + master_user_secret_kms_key_id         = (known after apply)
+      + max_allocated_storage                 = 50
+      + monitoring_interval                   = 0
+      + monitoring_role_arn                   = (known after apply)
+      + multi_az                              = false
+      + nchar_character_set_name              = (known after apply)
+      + network_type                          = (known after apply)
+      + option_group_name                     = (known after apply)
+      + parameter_group_name                  = "eventra-postgres16"
+      + password                              = (sensitive value)
+      + password_wo                           = (write-only attribute)
+      + performance_insights_enabled          = false
+      + performance_insights_kms_key_id       = (known after apply)
+      + performance_insights_retention_period = (known after apply)
+      + port                                  = (known after apply)
+      + publicly_accessible                   = false
+      + replica_mode                          = (known after apply)
+      + replicas                              = (known after apply)
+      + resource_id                           = (known after apply)
+      + skip_final_snapshot                   = true
+      + snapshot_identifier                   = (known after apply)
+      + status                                = (known after apply)
+      + storage_encrypted                     = true
+      + storage_throughput                    = (known after apply)
+      + storage_type                          = "gp3"
+      + tags                                  = {
+          + "Name" = "eventra-db"
+          + "Tier" = "db"
+        }
+      + tags_all                              = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-db"
+          + "Project"   = "eventra"
+          + "Tier"      = "db"
+        }
+      + timezone                              = (known after apply)
+      + username                              = "eventra_admin"
+      + vpc_security_group_ids                = (known after apply)
+    }
+
+  # aws_db_parameter_group.postgres will be created
+  + resource "aws_db_parameter_group" "postgres" {
+      + arn          = (known after apply)
+      + description  = "Managed by Terraform"
+      + family       = "postgres16"
+      + id           = (known after apply)
+      + name         = "eventra-postgres16"
+      + name_prefix  = (known after apply)
+      + skip_destroy = false
+      + tags_all     = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+
+      + parameter {
+          + apply_method = "immediate"
+          + name         = "rds.force_ssl"
+          + value        = "1"
+        }
+    }
+
+  # aws_db_subnet_group.main will be created
+  + resource "aws_db_subnet_group" "main" {
+      + arn                     = (known after apply)
+      + description             = "Private DB subnets in two AZs"
+      + id                      = (known after apply)
+      + name                    = "eventra-db-subnets"
+      + name_prefix             = (known after apply)
+      + subnet_ids              = (known after apply)
+      + supported_network_types = (known after apply)
+      + tags_all                = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + vpc_id                  = (known after apply)
+    }
+
+  # aws_ecr_lifecycle_policy.this["app"] will be created
+  + resource "aws_ecr_lifecycle_policy" "this" {
+      + id          = (known after apply)
+      + policy      = jsonencode(
+            {
+              + rules = [
+                  + {
+                      + action       = {
+                          + type = "expire"
+                        }
+                      + description  = "Keep the last 10 images"
+                      + rulePriority = 1
+                      + selection    = {
+                          + countNumber = 10
+                          + countType   = "imageCountMoreThan"
+                          + tagStatus   = "any"
+                        }
+                    },
+                ]
+            }
+        )
+      + registry_id = (known after apply)
+      + repository  = "eventra-app"
+    }
+
+  # aws_ecr_lifecycle_policy.this["web"] will be created
+  + resource "aws_ecr_lifecycle_policy" "this" {
+      + id          = (known after apply)
+      + policy      = jsonencode(
+            {
+              + rules = [
+                  + {
+                      + action       = {
+                          + type = "expire"
+                        }
+                      + description  = "Keep the last 10 images"
+                      + rulePriority = 1
+                      + selection    = {
+                          + countNumber = 10
+                          + countType   = "imageCountMoreThan"
+                          + tagStatus   = "any"
+                        }
+                    },
+                ]
+            }
+        )
+      + registry_id = (known after apply)
+      + repository  = "eventra-web"
+    }
+
+  # aws_ecr_repository.this["app"] will be created
+  + resource "aws_ecr_repository" "this" {
+      + arn                  = (known after apply)
+      + force_delete         = true
+      + id                   = (known after apply)
+      + image_tag_mutability = "MUTABLE"
+      + name                 = "eventra-app"
+      + registry_id          = (known after apply)
+      + repository_url       = (known after apply)
+      + tags_all             = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+
+      + encryption_configuration {
+          + encryption_type = "AES256"
+          + kms_key         = (known after apply)
+        }
+
+      + image_scanning_configuration {
+          + scan_on_push = true
+        }
+    }
+
+  # aws_ecr_repository.this["web"] will be created
+  + resource "aws_ecr_repository" "this" {
+      + arn                  = (known after apply)
+      + force_delete         = true
+      + id                   = (known after apply)
+      + image_tag_mutability = "MUTABLE"
+      + name                 = "eventra-web"
+      + registry_id          = (known after apply)
+      + repository_url       = (known after apply)
+      + tags_all             = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+
+      + encryption_configuration {
+          + encryption_type = "AES256"
+          + kms_key         = (known after apply)
+        }
+
+      + image_scanning_configuration {
+          + scan_on_push = true
+        }
+    }
+
+  # aws_ecs_cluster.main will be created
+  + resource "aws_ecs_cluster" "main" {
+      + arn      = (known after apply)
+      + id       = (known after apply)
+      + name     = "eventra"
+      + tags_all = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+
+      + service_connect_defaults {
+          + namespace = (known after apply)
+        }
+
+      + setting {
+          + name  = "containerInsights"
+          + value = "disabled"
+        }
+    }
+
+  # aws_ecs_cluster_capacity_providers.main will be created
+  + resource "aws_ecs_cluster_capacity_providers" "main" {
+      + capacity_providers = [
+          + "FARGATE",
+          + "FARGATE_SPOT",
+        ]
+      + cluster_name       = "eventra"
+      + id                 = (known after apply)
+
+      + default_capacity_provider_strategy {
+          + base              = 1
+          + capacity_provider = "FARGATE"
+          + weight            = 1
+        }
+    }
+
+  # aws_ecs_service.app will be created
+  + resource "aws_ecs_service" "app" {
+      + availability_zone_rebalancing      = "DISABLED"
+      + cluster                            = (known after apply)
+      + deployment_maximum_percent         = 200
+      + deployment_minimum_healthy_percent = 100
+      + desired_count                      = 1
+      + enable_ecs_managed_tags            = true
+      + enable_execute_command             = false
+      + iam_role                           = (known after apply)
+      + id                                 = (known after apply)
+      + launch_type                        = (known after apply)
+      + name                               = "eventra-app"
+      + platform_version                   = (known after apply)
+      + propagate_tags                     = "SERVICE"
+      + scheduling_strategy                = "REPLICA"
+      + tags_all                           = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + task_definition                    = (known after apply)
+      + triggers                           = (known after apply)
+      + wait_for_steady_state              = false
+
+      + capacity_provider_strategy {
+          + base              = 0
+          + capacity_provider = "FARGATE_SPOT"
+          + weight            = 1
+        }
+      + capacity_provider_strategy {
+          + base              = 1
+          + capacity_provider = "FARGATE"
+          + weight            = 1
+        }
+
+      + deployment_circuit_breaker {
+          + enable   = true
+          + rollback = true
+        }
+
+      + network_configuration {
+          + assign_public_ip = false
+          + security_groups  = (known after apply)
+          + subnets          = (known after apply)
+        }
+
+      + service_connect_configuration {
+          + enabled   = true
+          + namespace = (known after apply)
+
+          + log_configuration {
+              + log_driver = "awslogs"
+              + options    = {
+                  + "awslogs-group"         = "/ecs/eventra"
+                  + "awslogs-region"        = "us-east-1"
+                  + "awslogs-stream-prefix" = "app-proxy"
+                }
+            }
+
+          + service {
+              + discovery_name = "app"
+              + port_name      = "api"
+
+              + client_alias {
+                  + dns_name = "app.eventra.local"
+                  + port     = 4000
+                }
+            }
+        }
+    }
+
+  # aws_ecs_service.web will be created
+  + resource "aws_ecs_service" "web" {
+      + availability_zone_rebalancing      = "DISABLED"
+      + cluster                            = (known after apply)
+      + deployment_maximum_percent         = 200
+      + deployment_minimum_healthy_percent = 100
+      + desired_count                      = 1
+      + enable_ecs_managed_tags            = true
+      + enable_execute_command             = false
+      + health_check_grace_period_seconds  = 60
+      + iam_role                           = (known after apply)
+      + id                                 = (known after apply)
+      + launch_type                        = (known after apply)
+      + name                               = "eventra-web"
+      + platform_version                   = (known after apply)
+      + propagate_tags                     = "SERVICE"
+      + scheduling_strategy                = "REPLICA"
+      + tags_all                           = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + task_definition                    = (known after apply)
+      + triggers                           = (known after apply)
+      + wait_for_steady_state              = false
+
+      + capacity_provider_strategy {
+          + base              = 0
+          + capacity_provider = "FARGATE_SPOT"
+          + weight            = 1
+        }
+      + capacity_provider_strategy {
+          + base              = 1
+          + capacity_provider = "FARGATE"
+          + weight            = 1
+        }
+
+      + deployment_circuit_breaker {
+          + enable   = true
+          + rollback = true
+        }
+
+      + load_balancer {
+          + container_name   = "web"
+          + container_port   = 80
+          + target_group_arn = (known after apply)
+            # (1 unchanged attribute hidden)
+        }
+
+      + network_configuration {
+          + assign_public_ip = false
+          + security_groups  = (known after apply)
+          + subnets          = (known after apply)
+        }
+
+      + service_connect_configuration {
+          + enabled   = true
+          + namespace = (known after apply)
+        }
+    }
+
+  # aws_ecs_task_definition.app will be created
+  + resource "aws_ecs_task_definition" "app" {
+      + arn                      = (known after apply)
+      + arn_without_revision     = (known after apply)
+      + container_definitions    = (known after apply)
+      + cpu                      = "256"
+      + enable_fault_injection   = (known after apply)
+      + execution_role_arn       = (known after apply)
+      + family                   = "eventra-app"
+      + id                       = (known after apply)
+      + memory                   = "512"
+      + network_mode             = "awsvpc"
+      + requires_compatibilities = [
+          + "FARGATE",
+        ]
+      + revision                 = (known after apply)
+      + skip_destroy             = false
+      + tags_all                 = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + task_role_arn            = (known after apply)
+      + track_latest             = false
+
+      + runtime_platform {
+          + cpu_architecture        = "X86_64"
+          + operating_system_family = "LINUX"
+        }
+    }
+
+  # aws_ecs_task_definition.web will be created
+  + resource "aws_ecs_task_definition" "web" {
+      + arn                      = (known after apply)
+      + arn_without_revision     = (known after apply)
+      + container_definitions    = (known after apply)
+      + cpu                      = "256"
+      + enable_fault_injection   = (known after apply)
+      + execution_role_arn       = (known after apply)
+      + family                   = "eventra-web"
+      + id                       = (known after apply)
+      + memory                   = "512"
+      + network_mode             = "awsvpc"
+      + requires_compatibilities = [
+          + "FARGATE",
+        ]
+      + revision                 = (known after apply)
+      + skip_destroy             = false
+      + tags_all                 = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + task_role_arn            = (known after apply)
+      + track_latest             = false
+
+      + runtime_platform {
+          + cpu_architecture        = "X86_64"
+          + operating_system_family = "LINUX"
+        }
+    }
+
+  # aws_iam_openid_connect_provider.github[0] will be created
+  + resource "aws_iam_openid_connect_provider" "github" {
+      + arn             = (known after apply)
+      + client_id_list  = [
+          + "sts.amazonaws.com",
+        ]
+      + id              = (known after apply)
+      + tags_all        = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + thumbprint_list = [
+          + "6938fd4d98bab03faadb97b34396831e3780aea1",
+          + "1c58a3a8518e8759bf075b76b750d4f2df264fcd",
+        ]
+      + url             = "https://token.actions.githubusercontent.com"
+    }
+
+  # aws_iam_role.ecs_execution will be created
+  + resource "aws_iam_role" "ecs_execution" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "ecs-tasks.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "eventra-ecs-execution"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.ecs_task will be created
+  + resource "aws_iam_role" "ecs_task" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "ecs-tasks.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "eventra-ecs-task"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.github_deploy will be created
+  + resource "aws_iam_role" "github_deploy" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = (known after apply)
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "eventra-github-deploy"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags_all              = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy.ecs_execution_secret will be created
+  + resource "aws_iam_role_policy" "ecs_execution_secret" {
+      + id          = (known after apply)
+      + name        = "read-app-secret"
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy.github_deploy will be created
+  + resource "aws_iam_role_policy" "github_deploy" {
+      + id          = (known after apply)
+      + name        = "deploy-eventra"
+      + name_prefix = (known after apply)
+      + policy      = (known after apply)
+      + role        = (known after apply)
+    }
+
+  # aws_iam_role_policy_attachment.ecs_execution_managed will be created
+  + resource "aws_iam_role_policy_attachment" "ecs_execution_managed" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+      + role       = "eventra-ecs-execution"
+    }
+
+  # aws_instance.nat will be created
+  + resource "aws_instance" "nat" {
+      + ami                                  = (sensitive value)
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = true
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + enable_primary_ipv6                  = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_lifecycle                   = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t4g.nano"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = (known after apply)
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = false
+      + spot_instance_request_id             = (known after apply)
+      + subnet_id                            = (known after apply)
+      + tags                                 = {
+          + "Name" = "eventra-nat-instance"
+        }
+      + tags_all                             = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-nat-instance"
+          + "Project"   = "eventra"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = "08a4d481c49e62aa76755ff0de65ca17ce44170e"
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = true
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification (known after apply)
+
+      + cpu_options (known after apply)
+
+      + ebs_block_device (known after apply)
+
+      + enclave_options (known after apply)
+
+      + ephemeral_block_device (known after apply)
+
+      + instance_market_options (known after apply)
+
+      + maintenance_options (known after apply)
+
+      + metadata_options {
+          + http_endpoint               = "enabled"
+          + http_protocol_ipv6          = "disabled"
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = "required"
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface (known after apply)
+
+      + private_dns_name_options (known after apply)
+
+      + root_block_device {
+          + delete_on_termination = true
+          + device_name           = (known after apply)
+          + encrypted             = true
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags_all              = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = 8
+          + volume_type           = "gp3"
+        }
+    }
+
+  # aws_internet_gateway.main will be created
+  + resource "aws_internet_gateway" "main" {
+      + arn      = (known after apply)
+      + id       = (known after apply)
+      + owner_id = (known after apply)
+      + tags     = {
+          + "Name" = "eventra-igw"
+        }
+      + tags_all = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-igw"
+          + "Project"   = "eventra"
+        }
+      + vpc_id   = (known after apply)
+    }
+
+  # aws_lb.main will be created
+  + resource "aws_lb" "main" {
+      + arn                                                          = (known after apply)
+      + arn_suffix                                                   = (known after apply)
+      + client_keep_alive                                            = 3600
+      + desync_mitigation_mode                                       = "defensive"
+      + dns_name                                                     = (known after apply)
+      + drop_invalid_header_fields                                   = true
+      + enable_deletion_protection                                   = false
+      + enable_http2                                                 = true
+      + enable_tls_version_and_cipher_suite_headers                  = false
+      + enable_waf_fail_open                                         = false
+      + enable_xff_client_port                                       = false
+      + enable_zonal_shift                                           = false
+      + enforce_security_group_inbound_rules_on_private_link_traffic = (known after apply)
+      + id                                                           = (known after apply)
+      + idle_timeout                                                 = 60
+      + internal                                                     = false
+      + ip_address_type                                              = (known after apply)
+      + load_balancer_type                                           = "application"
+      + name                                                         = "eventra-alb"
+      + name_prefix                                                  = (known after apply)
+      + preserve_host_header                                         = false
+      + security_groups                                              = (known after apply)
+      + subnets                                                      = (known after apply)
+      + tags                                                         = {
+          + "Name" = "eventra-alb"
+          + "Tier" = "public"
+        }
+      + tags_all                                                     = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-alb"
+          + "Project"   = "eventra"
+          + "Tier"      = "public"
+        }
+      + vpc_id                                                       = (known after apply)
+      + xff_header_processing_mode                                   = "append"
+      + zone_id                                                      = (known after apply)
+
+      + subnet_mapping (known after apply)
+    }
+
+  # aws_lb_listener.http will be created
+  + resource "aws_lb_listener" "http" {
+      + arn                                                                   = (known after apply)
+      + id                                                                    = (known after apply)
+      + load_balancer_arn                                                     = (known after apply)
+      + port                                                                  = 80
+      + protocol                                                              = "HTTP"
+      + routing_http_request_x_amzn_mtls_clientcert_header_name               = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_issuer_header_name        = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_leaf_header_name          = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_serial_number_header_name = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_subject_header_name       = (known after apply)
+      + routing_http_request_x_amzn_mtls_clientcert_validity_header_name      = (known after apply)
+      + routing_http_request_x_amzn_tls_cipher_suite_header_name              = (known after apply)
+      + routing_http_request_x_amzn_tls_version_header_name                   = (known after apply)
+      + routing_http_response_access_control_allow_credentials_header_value   = (known after apply)
+      + routing_http_response_access_control_allow_headers_header_value       = (known after apply)
+      + routing_http_response_access_control_allow_methods_header_value       = (known after apply)
+      + routing_http_response_access_control_allow_origin_header_value        = (known after apply)
+      + routing_http_response_access_control_expose_headers_header_value      = (known after apply)
+      + routing_http_response_access_control_max_age_header_value             = (known after apply)
+      + routing_http_response_content_security_policy_header_value            = (known after apply)
+      + routing_http_response_server_enabled                                  = (known after apply)
+      + routing_http_response_strict_transport_security_header_value          = (known after apply)
+      + routing_http_response_x_content_type_options_header_value             = (known after apply)
+      + routing_http_response_x_frame_options_header_value                    = (known after apply)
+      + ssl_policy                                                            = (known after apply)
+      + tags_all                                                              = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + tcp_idle_timeout_seconds                                              = (known after apply)
+
+      + default_action {
+          + order            = (known after apply)
+          + target_group_arn = (known after apply)
+          + type             = "forward"
+        }
+
+      + mutual_authentication (known after apply)
+    }
+
+  # aws_lb_target_group.web will be created
+  + resource "aws_lb_target_group" "web" {
+      + arn                                = (known after apply)
+      + arn_suffix                         = (known after apply)
+      + connection_termination             = (known after apply)
+      + deregistration_delay               = "30"
+      + id                                 = (known after apply)
+      + ip_address_type                    = (known after apply)
+      + lambda_multi_value_headers_enabled = false
+      + load_balancer_arns                 = (known after apply)
+      + load_balancing_algorithm_type      = (known after apply)
+      + load_balancing_anomaly_mitigation  = (known after apply)
+      + load_balancing_cross_zone_enabled  = (known after apply)
+      + name                               = "eventra-web-tg"
+      + name_prefix                        = (known after apply)
+      + port                               = 80
+      + preserve_client_ip                 = (known after apply)
+      + protocol                           = "HTTP"
+      + protocol_version                   = (known after apply)
+      + proxy_protocol_v2                  = false
+      + slow_start                         = 0
+      + tags                               = {
+          + "Name" = "eventra-web-tg"
+        }
+      + tags_all                           = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-web-tg"
+          + "Project"   = "eventra"
+        }
+      + target_type                        = "ip"
+      + vpc_id                             = (known after apply)
+
+      + health_check {
+          + enabled             = true
+          + healthy_threshold   = 2
+          + interval            = 15
+          + matcher             = "200"
+          + path                = "/healthz"
+          + port                = "traffic-port"
+          + protocol            = "HTTP"
+          + timeout             = 5
+          + unhealthy_threshold = 3
+        }
+
+      + stickiness (known after apply)
+
+      + target_failover (known after apply)
+
+      + target_group_health (known after apply)
+
+      + target_health_state (known after apply)
+    }
+
+  # aws_route_table.private_app will be created
+  + resource "aws_route_table" "private_app" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = [
+          + {
+              + cidr_block                 = "0.0.0.0/0"
+              + network_interface_id       = (known after apply)
+                # (11 unchanged attributes hidden)
+            },
+        ]
+      + tags             = {
+          + "Name" = "eventra-rt-private-app"
+        }
+      + tags_all         = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-rt-private-app"
+          + "Project"   = "eventra"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table.private_db will be created
+  + resource "aws_route_table" "private_db" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = (known after apply)
+      + tags             = {
+          + "Name" = "eventra-rt-private-db"
+        }
+      + tags_all         = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-rt-private-db"
+          + "Project"   = "eventra"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table.public will be created
+  + resource "aws_route_table" "public" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = [
+          + {
+              + cidr_block                 = "0.0.0.0/0"
+              + gateway_id                 = (known after apply)
+                # (11 unchanged attributes hidden)
+            },
+        ]
+      + tags             = {
+          + "Name" = "eventra-rt-public"
+        }
+      + tags_all         = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-rt-public"
+          + "Project"   = "eventra"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table_association.private_app[0] will be created
+  + resource "aws_route_table_association" "private_app" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.private_app[1] will be created
+  + resource "aws_route_table_association" "private_app" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.private_db[0] will be created
+  + resource "aws_route_table_association" "private_db" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.private_db[1] will be created
+  + resource "aws_route_table_association" "private_db" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.public[0] will be created
+  + resource "aws_route_table_association" "public" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.public[1] will be created
+  + resource "aws_route_table_association" "public" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_secretsmanager_secret.app will be created
+  + resource "aws_secretsmanager_secret" "app" {
+      + arn                            = (known after apply)
+      + description                    = "Eventra API runtime secrets (database, JWT, admin login)"
+      + force_overwrite_replica_secret = false
+      + id                             = (known after apply)
+      + name                           = "eventra/app"
+      + name_prefix                    = (known after apply)
+      + policy                         = (known after apply)
+      + recovery_window_in_days        = 0
+      + tags_all                       = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+
+      + replica (known after apply)
+    }
+
+  # aws_secretsmanager_secret_version.app will be created
+  + resource "aws_secretsmanager_secret_version" "app" {
+      + arn                  = (known after apply)
+      + has_secret_string_wo = (known after apply)
+      + id                   = (known after apply)
+      + secret_id            = (known after apply)
+      + secret_string        = (sensitive value)
+      + secret_string_wo     = (write-only attribute)
+      + version_id           = (known after apply)
+      + version_stages       = (known after apply)
+    }
+
+  # aws_security_group.alb will be created
+  + resource "aws_security_group" "alb" {
+      + arn                    = (known after apply)
+      + description            = "Load balancer: HTTP from the internet, forwards only to the web tier"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "eventra-alb-sg"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "eventra-alb-sg"
+          + "Tier" = "public"
+        }
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-alb-sg"
+          + "Project"   = "eventra"
+          + "Tier"      = "public"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_security_group.app will be created
+  + resource "aws_security_group" "app" {
+      + arn                    = (known after apply)
+      + description            = "App tier (Node API): reachable only from the web tier"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "eventra-app-sg"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "eventra-app-sg"
+          + "Tier" = "app"
+        }
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-app-sg"
+          + "Project"   = "eventra"
+          + "Tier"      = "app"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_security_group.db will be created
+  + resource "aws_security_group" "db" {
+      + arn                    = (known after apply)
+      + description            = "Database tier (RDS): reachable only from the app tier, no outbound rules"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "eventra-db-sg"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "eventra-db-sg"
+          + "Tier" = "db"
+        }
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-db-sg"
+          + "Project"   = "eventra"
+          + "Tier"      = "db"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_security_group.nat will be created
+  + resource "aws_security_group" "nat" {
+      + arn                    = (known after apply)
+      + description            = "NAT instance: accepts traffic only from inside the VPC"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "eventra-nat-sg"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "eventra-nat-sg"
+        }
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-nat-sg"
+          + "Project"   = "eventra"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_security_group.web will be created
+  + resource "aws_security_group" "web" {
+      + arn                    = (known after apply)
+      + description            = "Web tier (Nginx): reachable only from the load balancer"
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = "eventra-web-sg"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "eventra-web-sg"
+          + "Tier" = "web"
+        }
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-web-sg"
+          + "Project"   = "eventra"
+          + "Tier"      = "web"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_service_discovery_http_namespace.main will be created
+  + resource "aws_service_discovery_http_namespace" "main" {
+      + arn         = (known after apply)
+      + description = "Private service names for Eventra (ECS Service Connect)"
+      + http_name   = (known after apply)
+      + id          = (known after apply)
+      + name        = "eventra.local"
+      + tags_all    = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+    }
+
+  # aws_sns_topic.alarms will be created
+  + resource "aws_sns_topic" "alarms" {
+      + arn                         = (known after apply)
+      + beginning_archive_time      = (known after apply)
+      + content_based_deduplication = false
+      + fifo_throughput_scope       = (known after apply)
+      + fifo_topic                  = false
+      + id                          = (known after apply)
+      + name                        = "eventra-alarms"
+      + name_prefix                 = (known after apply)
+      + owner                       = (known after apply)
+      + policy                      = (known after apply)
+      + signature_version           = (known after apply)
+      + tags_all                    = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + tracing_config              = (known after apply)
+    }
+
+  # aws_subnet.private_app[0] will be created
+  + resource "aws_subnet" "private_app" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.10.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "eventra-private-app-us-east-1a"
+          + "Tier" = "private-app"
+        }
+      + tags_all                                       = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-private-app-us-east-1a"
+          + "Project"   = "eventra"
+          + "Tier"      = "private-app"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.private_app[1] will be created
+  + resource "aws_subnet" "private_app" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.11.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "eventra-private-app-us-east-1b"
+          + "Tier" = "private-app"
+        }
+      + tags_all                                       = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-private-app-us-east-1b"
+          + "Project"   = "eventra"
+          + "Tier"      = "private-app"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.private_db[0] will be created
+  + resource "aws_subnet" "private_db" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.20.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "eventra-private-db-us-east-1a"
+          + "Tier" = "private-db"
+        }
+      + tags_all                                       = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-private-db-us-east-1a"
+          + "Project"   = "eventra"
+          + "Tier"      = "private-db"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.private_db[1] will be created
+  + resource "aws_subnet" "private_db" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.21.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "eventra-private-db-us-east-1b"
+          + "Tier" = "private-db"
+        }
+      + tags_all                                       = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-private-db-us-east-1b"
+          + "Project"   = "eventra"
+          + "Tier"      = "private-db"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.public[0] will be created
+  + resource "aws_subnet" "public" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.0.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = true
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "eventra-public-us-east-1a"
+          + "Tier" = "public"
+        }
+      + tags_all                                       = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-public-us-east-1a"
+          + "Project"   = "eventra"
+          + "Tier"      = "public"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.public[1] will be created
+  + resource "aws_subnet" "public" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.1.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = true
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "eventra-public-us-east-1b"
+          + "Tier" = "public"
+        }
+      + tags_all                                       = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-public-us-east-1b"
+          + "Project"   = "eventra"
+          + "Tier"      = "public"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_vpc.main will be created
+  + resource "aws_vpc" "main" {
+      + arn                                  = (known after apply)
+      + cidr_block                           = "10.0.0.0/16"
+      + default_network_acl_id               = (known after apply)
+      + default_route_table_id               = (known after apply)
+      + default_security_group_id            = (known after apply)
+      + dhcp_options_id                      = (known after apply)
+      + enable_dns_hostnames                 = true
+      + enable_dns_support                   = true
+      + enable_network_address_usage_metrics = (known after apply)
+      + id                                   = (known after apply)
+      + instance_tenancy                     = "default"
+      + ipv6_association_id                  = (known after apply)
+      + ipv6_cidr_block                      = (known after apply)
+      + ipv6_cidr_block_network_border_group = (known after apply)
+      + main_route_table_id                  = (known after apply)
+      + owner_id                             = (known after apply)
+      + tags                                 = {
+          + "Name" = "eventra-vpc"
+        }
+      + tags_all                             = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Name"      = "eventra-vpc"
+          + "Project"   = "eventra"
+        }
+    }
+
+  # aws_vpc_security_group_egress_rule.alb_to_web will be created
+  + resource "aws_vpc_security_group_egress_rule" "alb_to_web" {
+      + arn                          = (known after apply)
+      + description                  = "Forward requests and health checks to web tasks"
+      + from_port                    = 80
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + to_port                      = 80
+    }
+
+  # aws_vpc_security_group_egress_rule.app_https_out will be created
+  + resource "aws_vpc_security_group_egress_rule" "app_https_out" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "0.0.0.0/0"
+      + description            = "HTTPS out via NAT: ECR, Secrets Manager, CloudWatch"
+      + from_port              = 443
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + to_port                = 443
+    }
+
+  # aws_vpc_security_group_egress_rule.app_to_db will be created
+  + resource "aws_vpc_security_group_egress_rule" "app_to_db" {
+      + arn                          = (known after apply)
+      + description                  = "PostgreSQL to the database tier"
+      + from_port                    = 5432
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + to_port                      = 5432
+    }
+
+  # aws_vpc_security_group_egress_rule.nat_to_internet will be created
+  + resource "aws_vpc_security_group_egress_rule" "nat_to_internet" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "0.0.0.0/0"
+      + description            = "Forward outbound traffic to the internet"
+      + id                     = (known after apply)
+      + ip_protocol            = "-1"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+    }
+
+  # aws_vpc_security_group_egress_rule.web_https_out will be created
+  + resource "aws_vpc_security_group_egress_rule" "web_https_out" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "0.0.0.0/0"
+      + description            = "HTTPS out via NAT: pull images from ECR, send logs to CloudWatch"
+      + from_port              = 443
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + to_port                = 443
+    }
+
+  # aws_vpc_security_group_egress_rule.web_to_app will be created
+  + resource "aws_vpc_security_group_egress_rule" "web_to_app" {
+      + arn                          = (known after apply)
+      + description                  = "API calls to the app tier (Service Connect)"
+      + from_port                    = 4000
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + to_port                      = 4000
+    }
+
+  # aws_vpc_security_group_ingress_rule.alb_http will be created
+  + resource "aws_vpc_security_group_ingress_rule" "alb_http" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "0.0.0.0/0"
+      + description            = "HTTP from anywhere"
+      + from_port              = 80
+      + id                     = (known after apply)
+      + ip_protocol            = "tcp"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + to_port                = 80
+    }
+
+  # aws_vpc_security_group_ingress_rule.app_from_web will be created
+  + resource "aws_vpc_security_group_ingress_rule" "app_from_web" {
+      + arn                          = (known after apply)
+      + description                  = "API port from the web tier only"
+      + from_port                    = 4000
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + to_port                      = 4000
+    }
+
+  # aws_vpc_security_group_ingress_rule.db_from_app will be created
+  + resource "aws_vpc_security_group_ingress_rule" "db_from_app" {
+      + arn                          = (known after apply)
+      + description                  = "PostgreSQL from the app tier only"
+      + from_port                    = 5432
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + to_port                      = 5432
+    }
+
+  # aws_vpc_security_group_ingress_rule.nat_from_vpc will be created
+  + resource "aws_vpc_security_group_ingress_rule" "nat_from_vpc" {
+      + arn                    = (known after apply)
+      + cidr_ipv4              = "10.0.0.0/16"
+      + description            = "Any traffic from inside the VPC (to be forwarded to the internet)"
+      + id                     = (known after apply)
+      + ip_protocol            = "-1"
+      + security_group_id      = (known after apply)
+      + security_group_rule_id = (known after apply)
+      + tags_all               = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+    }
+
+  # aws_vpc_security_group_ingress_rule.web_from_alb will be created
+  + resource "aws_vpc_security_group_ingress_rule" "web_from_alb" {
+      + arn                          = (known after apply)
+      + description                  = "HTTP from the load balancer only"
+      + from_port                    = 80
+      + id                           = (known after apply)
+      + ip_protocol                  = "tcp"
+      + referenced_security_group_id = (known after apply)
+      + security_group_id            = (known after apply)
+      + security_group_rule_id       = (known after apply)
+      + tags_all                     = {
+          + "Course"    = "SE-490 Cloud Computing"
+          + "ManagedBy" = "terraform"
+          + "Project"   = "eventra"
+        }
+      + to_port                      = 80
+    }
+
+  # random_password.admin will be created
+  + resource "random_password" "admin" {
+      + bcrypt_hash      = (sensitive value)
+      + id               = (known after apply)
+      + length           = 20
+      + lower            = true
+      + min_lower        = 0
+      + min_numeric      = 0
+      + min_special      = 0
+      + min_upper        = 0
+      + number           = true
+      + numeric          = true
+      + override_special = "!#%*-_=+"
+      + result           = (sensitive value)
+      + special          = true
+      + upper            = true
+    }
+
+  # random_password.db will be created
+  + resource "random_password" "db" {
+      + bcrypt_hash      = (sensitive value)
+      + id               = (known after apply)
+      + length           = 32
+      + lower            = true
+      + min_lower        = 0
+      + min_numeric      = 0
+      + min_special      = 0
+      + min_upper        = 0
+      + number           = true
+      + numeric          = true
+      + override_special = "!#$%^&*()-_=+[]{}<>:?"
+      + result           = (sensitive value)
+      + special          = true
+      + upper            = true
+    }
+
+  # random_password.jwt will be created
+  + resource "random_password" "jwt" {
+      + bcrypt_hash = (sensitive value)
+      + id          = (known after apply)
+      + length      = 64
+      + lower       = true
+      + min_lower   = 0
+      + min_numeric = 0
+      + min_special = 0
+      + min_upper   = 0
+      + number      = true
+      + numeric     = true
+      + result      = (sensitive value)
+      + special     = false
+      + upper       = true
+    }
+
+Plan: 75 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + admin_email              = "admin@eventra.app"
+  + admin_password_command   = "aws secretsmanager get-secret-value --secret-id eventra/app --query SecretString --output text --region us-east-1"
+  + cloudwatch_dashboard_url = "https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards/dashboard/eventra-overview"
+  + ecr_repository_urls      = {
+      + app = (known after apply)
+      + web = (known after apply)
+    }
+  + github_actions_secret    = {
+      + AWS_ROLE_ARN = (known after apply)
+    }
+  + github_actions_variables = {
+      + AWS_DEPLOY_ENABLED = "true"
+      + AWS_REGION         = "us-east-1"
+      + ECR_REPO_APP       = "eventra-app"
+      + ECR_REPO_WEB       = "eventra-web"
+      + ECS_CLUSTER        = "eventra"
+      + ECS_SERVICE_APP    = "eventra-app"
+      + ECS_SERVICE_WEB    = "eventra-web"
+    }
+  + rds_endpoint             = (known after apply)
+  + vpc_id                   = (known after apply)
+  + website_url              = (known after apply)
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "tfplan"

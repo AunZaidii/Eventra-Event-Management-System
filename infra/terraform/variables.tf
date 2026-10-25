@@ -33,7 +33,7 @@ variable "vpc_cidr" {
 variable "nat_instance_type" {
   description = "Size of the NAT instance (cheap replacement for a NAT Gateway)"
   type        = string
-  default     = "t4g.nano"
+  default     = "t4g.micro" # Free-plan accounts only allow free-tier-eligible types (t4g.nano is not)
 }
 
 # ---------------- Application ----------------

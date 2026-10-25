@@ -109,13 +109,13 @@ Each attribute below lists the **design decisions** that support it (with where 
 
 ## 7. Cost-Efficiency
 **Decisions** ([cost-estimate.md](cost-estimate.md))
-- ≈ **$65/month** compared with ≈ $127 for the standard HA layout.
-- NAT instance instead of a NAT Gateway (–$30/month).
+- ≈ **$68/month** compared with ≈ $127 for the standard HA layout.
+- NAT instance instead of a NAT Gateway (–$27/month).
 - Smallest Fargate size, with a minimum of 1 task and auto scaling.
 - FARGATE_SPOT for scaled-out tasks.
 - Graviton t4g for the NAT and RDS.
 - 7-day log retention and ECR lifecycle rules.
-- One command to destroy everything (≈ $2.20/day while running).
+- One command to destroy everything (≈ $2.25/day while running).
 
 **Limitations:** this saving is exactly what reduces availability (§2). The trade-off is a conscious choice for a coursework system, and switching to the HA setup takes two variable changes.
 
