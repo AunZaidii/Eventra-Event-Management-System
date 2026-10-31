@@ -17,9 +17,10 @@ on:
 permissions:
   contents: read
 
+# Only superseded pull request runs are cancelled: a run on main may be mid-deploy.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   backend-test:
@@ -141,6 +142,24 @@ jobs:
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check deployment settings
+        env:
+          ROLE: ${{ secrets.AWS_ROLE_ARN }}
+          CLUSTER: ${{ vars.ECS_CLUSTER }}
+          SERVICE_APP: ${{ vars.ECS_SERVICE_APP }}
+          SERVICE_WEB: ${{ vars.ECS_SERVICE_WEB }}
+        run: |
+          missing=""
+          for name in ROLE AWS_REGION ECR_REPO_APP ECR_REPO_WEB CLUSTER SERVICE_APP SERVICE_WEB; do
+            value="${!name}"
+            if [ -z "$value" ] || [ "$value" != "$(echo "$value" | xargs)" ]; then missing="$missing $name"; fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Missing or badly formatted GitHub secret/variables:$missing"
+            exit 1
+          fi
+          echo "All deployment settings are present."
 
       - name: Log in to AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
