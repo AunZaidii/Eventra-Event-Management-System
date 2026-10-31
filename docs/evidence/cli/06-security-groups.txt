@@ -1,6 +1,6 @@
 # Security groups and rules per tier
 # $ aws_ ec2 describe-security-group-rules --filters Name=group-id,Values=sg-0f9dbc76115bb1631,sg-054bcc3f2cc440da1,sg-06dc00876f95964dd,sg-0480205572dc3f99c,sg-09d4ac6138857aa9a --query sort_by(SecurityGroupRules,&GroupId)[].{Group:GroupId,Egress:IsEgress,Proto:IpProtocol,From:FromPort,To:ToPort,Cidr:CidrIpv4,FromGroup:ReferencedGroupInfo.GroupId,Description:Description} --output table
-# captured 2026-10-31T14:20:07Z
+# captured 2026-10-31T19:53:41Z
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 |                                                                      DescribeSecurityGroupRules                                                                       |

@@ -1,6 +1,6 @@
 # Internet Gateway
 # $ aws_ ec2 describe-internet-gateways --filters Name=attachment.vpc-id,Values=vpc-094b9a97fabee7289 --output table
-# captured 2026-10-31T14:19:54Z
+# captured 2026-10-31T19:53:22Z
 
 ---------------------------------------------
 |         DescribeInternetGateways          |

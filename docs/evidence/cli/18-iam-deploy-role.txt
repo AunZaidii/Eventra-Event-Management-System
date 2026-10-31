@@ -1,6 +1,6 @@
 # GitHub OIDC deploy role trust policy
 # $ aws_ iam get-role --role-name eventra-github-deploy --query Role.AssumeRolePolicyDocument --output json
-# captured 2026-10-31T14:21:07Z
+# captured 2026-10-31T19:55:38Z
 
 {
     "Version": "2012-10-17",

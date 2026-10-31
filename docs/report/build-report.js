@@ -11,7 +11,7 @@ const {
 
 // ---------- Fill in your details ----------
 const STUDENT = {
-  name: '[Your Name]',
+  name: 'Aun Zaidi',
   roll: '[Roll Number]',
   section: '[Section]',
   instructor: '[Instructor Name]',
@@ -123,8 +123,23 @@ function figure(file, caption, hint, maxWidthPx = 600, maxHeightPx = 760) {
 const shot = (name, caption, hint) => figure(path.join(EVIDENCE, 'screenshots', name), caption, hint);
 const appShot = (name, caption, maxH) => figure(path.join(EVIDENCE, 'app', name), caption, 'Captured by tests/e2e/ui-test.js on the live site (deploy-plan step 7)', 600, maxH);
 
+const usedCli = new Set();
+// Console screenshot if present, otherwise the real AWS CLI output for the same component.
+function ev(name, caption, cli) {
+  if (fs.existsSync(path.join(EVIDENCE, 'screenshots', name)) || !cli) return shot(name, caption);
+  if (usedCli.has(cli)) return [];
+  usedCli.add(cli);
+  const shared = {
+    '03-route-tables.png': 'Route tables: public → Internet Gateway, private app → NAT instance, private DB local only',
+    '06-security-groups.png': 'Security group rules for all tiers (each tier accepts only the tier in front of it)',
+    '11-ecs-services.png': 'ECS cluster with the web and app services',
+    '14-rds.png': 'RDS PostgreSQL: publicly accessible false, storage encrypted',
+  };
+  return figure(path.join(EVIDENCE, 'cli-images', cli), cli === 'docker-build.png' ? 'Docker image build log (local docker compose build)' : `${shared[cli] || caption} (live AWS CLI output)`, null, 600, 700);
+}
+
 const pricingLinkFile = path.join(EVIDENCE, 'pricing-link.txt');
-const pricingLink = fs.existsSync(pricingLinkFile) ? fs.readFileSync(pricingLinkFile, 'utf8').trim() : '[paste the AWS Pricing Calculator share link]';
+const pricingLink = fs.existsSync(pricingLinkFile) ? fs.readFileSync(pricingLinkFile, 'utf8').trim() : null;
 
 // ---------- content ----------
 const body = [];
@@ -146,7 +161,7 @@ body.push(
 body.push(
   h1('1. Introduction and Cloud Provider Choice'),
   p('Eventra is a three-tier web application: visitors browse upcoming events and register (with duplicate-email and sold-out protection), and an administrator manages events, views a statistics dashboard and exports registrations as CSV. The objective of this activity was to containerize the application, deploy it on a public cloud with production-style networking and security, and automate build, test and deployment with a CI/CD pipeline.'),
-  p('**Amazon Web Services (AWS)** was chosen because (1) it provides every required building block as a managed service — VPC, Application Load Balancer, ECS Fargate, RDS PostgreSQL, ECR, Secrets Manager, CloudWatch; (2) ECS Fargate runs containers without managing servers, which keeps the solution small enough for a single engineer; (3) GitHub Actions authenticates to AWS with OpenID Connect, removing long-lived access keys from the pipeline; and (4) AWS has the largest market share and the most learning resources, which matters for maintainability. Region **us-east-1** offers the lowest prices and all services used.'),
+  p('**Amazon Web Services (AWS)** was chosen because (1) it provides every required building block as a managed service — VPC, Application Load Balancer, ECS Fargate, RDS PostgreSQL, ECR, Secrets Manager, CloudWatch; (2) ECS Fargate runs containers without managing servers, which keeps the solution small enough for a single engineer; (3) GitHub Actions authenticates to AWS with OpenID Connect, removing long-lived access keys from the pipeline; and (4) AWS has the largest market share and the most learning resources, which matters for maintainability. Region **us-east-1** has among the lowest AWS prices and offers every service used.'),
 );
 
 // 2
@@ -253,9 +268,8 @@ body.push(
     [2300, 4626, 2100],
   ),
   spacer(),
-  p('Testing found and fixed one critical defect (a React effect returned the Promise from window.scrollTo(), blanking the page on navigation in current Chrome) and two layout issues; the regression checks are part of the UI suite. The first cloud deployment exposed four configuration issues, each fixed and documented: the ECS service-linked role was not yet ready on a new account, the free account plan rejected t4g.nano, GitHub’s OIDC subject now includes immutable owner and repository IDs (the IAM trust policy was extended to accept them), and one repository variable held a wrong value (found in the deploy job log). Figures 2 and 3 show the automated deployment run and the live application served through the load balancer; the complete evidence set is in Appendix A.'),
-  ...shot('26-github-actions-run.png', 'GitHub Actions run with all jobs green, including the AWS deploy', 'GitHub → Actions → latest run on main'),
-  ...shot('28-app-in-browser.png', 'Eventra running on AWS, opened through the ALB address', 'Browser showing the website_url from terraform output'),
+  p('Testing found and fixed one critical defect (a React effect returned the Promise from window.scrollTo(), blanking the page on navigation in current Chrome) and two layout issues; the regression checks are part of the UI suite. The first cloud deployment exposed four configuration issues, each fixed and documented: the ECS service-linked role was not yet ready on a new account, the free account plan rejected t4g.nano, GitHub’s OIDC subject now includes immutable owner and repository IDs (the IAM trust policy was extended to accept them), and one repository variable held a wrong value (found in the deploy job log). A load test against the live site (about 25,000 requests, 1 failed) raised ALB requests per target, and auto scaling increased the web service from 1 to 3 tasks with no manual action (Figure 2), then returned it to 1 task about 20 minutes after the traffic stopped. A code push deployed through CI/CD during that same test, showing a rolling update under load. The complete evidence set is in Appendix B.'),
+  ...figure(path.join(EVIDENCE, 'cli-images', '23-autoscaling-timeline.png'), 'Web tasks scaling from 1 to 3 during the load test (desired | running | healthy targets; the value 5 is during a rolling deploy)', null, 520, 260),
 );
 
 // 8
@@ -295,17 +309,18 @@ body.push(
     [3000, 4126, 1900],
   ),
   spacer(),
-  p(`Estimate checked with the AWS Pricing Calculator: ${pricingLink}. **Implemented optimizations:** (1) NAT instance instead of NAT Gateway (–$27/month); (2) right-sized Fargate tasks with a minimum of one per tier and automatic scale-in; (3) FARGATE_SPOT for scaled-out tasks (up to 70% cheaper); (4) Graviton t4g instances for NAT and RDS; (5) 7-day log retention and ECR lifecycle rules; (6) terraform destroy between demonstrations. **Proposed:** ARM64 Fargate images (–20%), scheduled scale-to-zero for non-production, Savings Plans/Reserved Instances for long-running production, and S3 + CloudFront for static assets.`),
+  p(`${pricingLink ? `Estimate from the AWS Pricing Calculator: ${pricingLink}.` : 'Estimate based on published on-demand prices; the AWS Pricing Calculator inputs are in docs/cost-estimate.md.'} **Implemented optimizations:** (1) NAT instance instead of NAT Gateway (–$27/month); (2) right-sized Fargate tasks with a minimum of one per tier and automatic scale-in; (3) FARGATE_SPOT for scaled-out tasks (up to 70% cheaper); (4) Graviton t4g instances for NAT and RDS; (5) 7-day log retention and ECR lifecycle rules; (6) terraform destroy between demonstrations. **Proposed:** ARM64 Fargate images (–20%), scheduled scale-to-zero for non-production, Savings Plans/Reserved Instances for long-running production, and S3 + CloudFront for static assets.`),
 );
 
 // 10
 body.push(
   h1('10. Limitations and Conclusion'),
-  p('The solution meets every system requirement of the brief: VPC with public/private subnets, Internet Gateway, route tables and NAT; containerized web and application tiers built from Dockerfiles; a managed, non-public PostgreSQL database; images in Amazon ECR; a GitHub Actions pipeline that tests, builds, pushes and deploys on every change; an ALB with a target group and auto scaling; per-tier security groups, segmentation, least-privilege IAM and managed secrets; and four cloud-native enhancements (Terraform IaC, centralized CloudWatch logging/monitoring/alarms, a cost estimate with optimizations, and Spot-based cost tuning).'),
+  p('The solution meets every system requirement of the brief: VPC with public/private subnets, Internet Gateway, route tables and NAT; containerized web and application tiers built from Dockerfiles; a managed, non-public PostgreSQL database; images in Amazon ECR; a GitHub Actions pipeline that tests, builds, pushes and deploys on every change; an ALB with a target group and auto scaling; per-tier security groups, segmentation, least-privilege IAM and managed secrets; and three cloud-native enhancements (Terraform infrastructure as code, centralized CloudWatch logging and monitoring, and a monthly cost estimate with optimization measures). Appendix A maps every item of the brief to its implementation and evidence.'),
   p('Honest limitations, all deliberate cost trade-offs or out of scope for coursework: single NAT instance and single-AZ database, one task per tier at rest, HTTP without TLS at the load balancer, and per-task rate-limit counters. Each has a one-line Terraform or configuration change toward production readiness, listed in §8.'),
 );
 
 // Appendix A
+const CLI = {"01-vpc.png":"01-vpc.png","02-subnets.png":"02-subnets.png","03-route-tables.png":"03-route-tables.png","04-route-table-private.png":"03-route-tables.png","05-internet-gateway.png":"04-internet-gateway.png","06-nat-instance.png":"05-nat-instance.png","07-ecs-cluster.png":"11-ecs-services.png","08-ecs-tasks.png":"12-ecs-tasks.png","09-ecs-service-connect.png":"11-ecs-services.png","10-autoscaling.png":"13-autoscaling.png","11-sg-alb.png":"06-security-groups.png","12-sg-web.png":"06-security-groups.png","13-sg-app.png":"06-security-groups.png","14-sg-db.png":"06-security-groups.png","15-load-balancer.png":"08-load-balancer.png","16-target-group.png":"10-target-health.png","17-rds.png":"14-rds.png","18-rds-config.png":"14-rds.png","19-ecr-repos.png":"15-ecr-repositories.png","20-ecr-images.png":"16-ecr-images.png","21-secrets-manager.png":"17-secrets.png","22-iam-oidc.png":"18-iam-deploy-role.png","24-cloudwatch-alarms.png":"19-cloudwatch.png","25-cloudwatch-logs.png":"24-cloudwatch-logs.png","27-github-deploy-log.png":"docker-build.png"};
 const evidence = [
   ['Network / VPC', [
     ['01-vpc.png', 'VPC eventra-vpc (10.0.0.0/16)'],
@@ -347,30 +362,77 @@ const evidence = [
     ['25-cloudwatch-logs.png', 'Centralized container logs (/ecs/eventra)'],
   ]],
   ['CI/CD', [
-    ['27-github-deploy-log.png', 'Deploy job log: push to ECR and health-check smoke test'],
+    ['26-github-actions-run.png', 'GitHub Actions run with all jobs green, including the AWS deploy'],
+    ['27-github-deploy-log.png', 'Docker image build'],
   ]],
   ['Cost', [
     ['29-pricing-calculator.png', 'AWS Pricing Calculator estimate'],
   ]],
 ];
 
-body.push(new Paragraph({ children: [new PageBreak()] }), h1('Appendix A — Deployment Evidence'));
-body.push(p('Console screenshots were captured from the live deployment as listed in docs/evidence-checklist.md. Command-line evidence for every component is in docs/evidence/cli/ (generated by infra/collect-evidence.sh).'));
+const OK = 'Met';
+body.push(new Paragraph({ children: [new PageBreak()] }), h1('Appendix A — Requirements Compliance Matrix'));
+body.push(p('Every item of the CEA problem statement, how it is met, and where to verify it.'));
+body.push(table(['Brief item', 'Implementation', 'Where to verify', 'Status'], [
+  ['1. VPC with CIDR', 'eventra-vpc 10.0.0.0/16', 'infra/terraform/network.tf', OK],
+  ['1. Public subnets', '10.0.0.0/24, 10.0.1.0/24 (ALB, NAT)', 'network.tf', OK],
+  ['1. Private subnets', 'App 10.0.10.0/24, 10.0.11.0/24; DB 10.0.20.0/24, 10.0.21.0/24', 'network.tf', OK],
+  ['1. Internet Gateway', 'eventra-igw attached to the VPC', 'network.tf', OK],
+  ['1. Route tables', 'Public → IGW; private app → NAT; DB local only', 'network.tf', OK],
+  ['1. NAT or equivalent', 'NAT instance (EC2 t4g.micro), an accepted equivalent', 'nat.tf', OK],
+  ['2. Web tier container', 'Nginx + React, multi-stage Dockerfile; public through the ALB', 'frontend/Dockerfile, ecs.tf', OK],
+  ['3. App tier container', 'Node.js + Express on Fargate, private subnets, no public IP', 'backend/Dockerfile, ecs.tf', OK],
+  ['3. docker-compose', 'Local three-service orchestration', 'docker-compose.yml', OK],
+  ['3. Reachable only from web', 'Service Connect; app-sg allows 4000 from web-sg only', 'security_groups.tf', OK],
+  ['3. Secure link to database', 'TLS required (rds.force_ssl = 1); app-sg → db-sg 5432', 'database.tf', OK],
+  ['4. Managed database', 'Amazon RDS PostgreSQL 16', 'database.tf', OK],
+  ['4. Not publicly exposed', 'publicly_accessible = false, no internet route', 'database.tf', OK],
+  ['5. Container registry', 'Amazon ECR repositories eventra-web, eventra-app', 'ecr.tf', OK],
+  ['6. Runs on every change', 'GitHub Actions on every push to main', 'ci-cd.yml', OK],
+  ['6. Tests', '78 backend tests, lint, Terraform validate', 'ci-cd.yml', OK],
+  ['6. Build, push, deploy', 'Docker build → ECR → rolling ECS update → smoke test', 'ci-cd.yml', OK],
+  ['7. Load balancer', 'Application Load Balancer eventra-alb', 'load_balancer.tf', OK],
+  ['7. Target group', 'eventra-web-tg with /healthz health check', 'load_balancer.tf', OK],
+  ['7. Auto scaling', 'ECS target tracking, 1–3 tasks; tested 1 → 3 → 1 under load', 'ecs.tf, Figure 2', OK],
+  ['8. Security groups per tier', 'alb-sg, web-sg, app-sg, db-sg, nat-sg', 'security_groups.tf', OK],
+  ['8. Segmentation', 'Three subnet layers', 'network.tf', OK],
+  ['8. Least privilege', 'Tier rules reference security groups; scoped IAM roles', 'security_groups.tf, iam.tf', OK],
+  ['8. Secrets management', 'Secrets Manager at runtime; OIDC, no stored AWS keys in CI/CD', 'secrets.tf, iam.tf', OK],
+  ['9. Infrastructure as code', 'Terraform for all infrastructure', 'infra/terraform', OK],
+  ['9. Logging and monitoring', 'CloudWatch logs, dashboard, alarms', 'monitoring.tf', OK],
+  ['9. Cost estimate', 'Monthly estimate and optimizations (§9)', 'docs/cost-estimate.md', pricingLink ? OK : 'Estimate done; calculator link to add'],
+  ['10. NFR justification', 'All 8 NFRs with limitations', '§8, docs/nfr.md', OK],
+  ['Deliverable 1: Diagram', 'Figure 1', '§2', OK],
+  ['Deliverable 2: Evidence', 'Live evidence for all 8 items', 'Appendix B', fs.existsSync(path.join(EVIDENCE, 'screenshots')) ? OK : 'CLI evidence in; console shots to add'],
+  ['Deliverable 3: Source files', 'Dockerfiles, compose, pipeline, Terraform', 'Appendix C', OK],
+  ['Deliverable 4: Report', 'This document', '§1–§10', OK],
+], [2300, 3500, 1900, 1326]));
+
+body.push(new Paragraph({ children: [new PageBreak()] }), h1('Appendix B — Deployment Evidence'));
+body.push(p('Evidence from the live deployment in AWS account 988710971825 (us-east-1). Figures marked "live AWS CLI output" show unmodified command output captured by infra/collect-evidence.sh; the full text is in docs/evidence/cli/.'));
 for (const [group, items] of evidence) {
   body.push(h2(group));
-  for (const [file, caption] of items) body.push(...shot(file, caption));
+  for (const [file, caption] of items) {
+    if (file === '23-cloudwatch-dashboard.png' && !fs.existsSync(path.join(EVIDENCE, 'screenshots', file))) {
+      const cw = (name, cap) => figure(path.join(EVIDENCE, 'cli-images', name), `${cap} (CloudWatch metric graph)`, null, 560, 240);
+      body.push(...cw('cw-requests.png', 'Load balancer requests per minute during the load test'), ...cw('cw-healthy-hosts.png', 'Healthy web tasks behind the load balancer'), ...cw('cw-ecs-cpu.png', 'ECS CPU per service'));
+    } else {
+      body.push(...ev(file, caption, CLI[file]));
+      if (file === '10-autoscaling.png') body.push(...figure(path.join(EVIDENCE, 'cli-images', '25-scaling-activities.png'), 'AWS record: alarms raised the task count under load and lowered it afterwards, automatically', null, 600, 220));
+    }
+  }
 }
 body.push(h2('Running application (captured automatically on the live site)'));
 body.push(
   ...appShot('01-home-desktop.png', 'Homepage — upcoming events (desktop)', 700),
-  ...appShot('02-home-phone.png', 'Homepage on a phone-size screen', 640),
+  ...appShot('02-home-phone-top.png', 'Homepage on a phone-size screen (top of page)', 640),
   ...appShot('03-event-details.png', 'Event details with registration form', 640),
   ...appShot('04-confirmation.png', 'Registration confirmation with unique code', 640),
   ...appShot('07-dashboard.png', 'Admin dashboard with statistics and chart', 640),
   ...appShot('10-registrations.png', 'Registrations list with CSV export', 640),
 );
 
-body.push(h1('Appendix B — Source Files'));
+body.push(h1('Appendix C — Source Files'));
 body.push(
   table(
     ['File', 'Purpose'],

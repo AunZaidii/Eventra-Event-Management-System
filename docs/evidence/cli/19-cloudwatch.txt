@@ -1,6 +1,6 @@
 # CloudWatch alarms and log group
 # $ bash -c aws --region us-east-1 cloudwatch describe-alarms --alarm-name-prefix eventra   --query 'MetricAlarms[].{Alarm:AlarmName,State:StateValue,Metric:MetricName}' --output table;   aws --region us-east-1 logs describe-log-groups --log-group-name-prefix /ecs/eventra --query 'logGroups[].{Name:logGroupName,RetentionDays:retentionInDays}' --output table
-# captured 2026-10-31T14:21:11Z
+# captured 2026-10-31T19:55:45Z
 
 -------------------------------------------------------------------------
 |                            DescribeAlarms                             |

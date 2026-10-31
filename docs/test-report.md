@@ -10,7 +10,9 @@
 | `/api/health` through ALB → Nginx → Service Connect → API → RDS | ✅ `{"status":"ok","db":"up"}` |
 | ALB target group | ✅ web task healthy (private IP 10.0.11.x) |
 | Browser UI suite against the ALB address (`tests/e2e/ui-test.js`) | ✅ **30 / 30 passed** |
-| AWS CLI evidence (`infra/collect-evidence.sh`) | ✅ 22 files in `docs/evidence/cli/` |
+| Load test on the live site (`tests/e2e/load-test.js`) | ✅ about 25,000 requests, 1 failed; a CI/CD rolling deploy ran during it |
+| Auto scaling | ✅ web tasks 1 → 3 under load, back to 1 automatically afterwards |
+| AWS CLI evidence (`infra/collect-evidence.sh`) | ✅ saved in `docs/evidence/cli/` |
 
 ### Deployment problems found and fixed
 | Problem | Cause | Fix |

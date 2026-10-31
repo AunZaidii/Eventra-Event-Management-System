@@ -40,7 +40,7 @@ Each attribute below lists the **design decisions** that support it (with where 
 - **Fargate:** no servers to pre-provision. Each new task gets exactly 0.25 vCPU and 0.5 GB.
 - **RDS storage autoscaling** from 20 to 50 GB.
 
-**Evidence:** scaling targets and policies (`docs/evidence/cli/13-autoscaling.txt`, screenshot 10). The load test in deploy-plan step 8 shows scale-out.
+**Evidence:** scaling targets and policies (`docs/evidence/cli/13-autoscaling.txt`). A live load test of about 25,000 requests (1 failed) took the web service from 1 to 3 tasks automatically, and AWS returned it to 1 task about 20 minutes after traffic stopped (`docs/evidence/cli/23-autoscaling-timeline.txt`, `25-scaling-activities.txt`).
 
 **Limitations:** the database compute doesn't scale automatically. *Improvement:* Aurora Serverless v2.
 

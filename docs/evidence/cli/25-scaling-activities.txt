@@ -1,0 +1,4 @@
+﻿# AWS record of ECS auto scaling activity on eventra-web
+2026-11-01T00:56:03.658000+05:00	Successful	monitor alarm TargetTracking-service/eventra/eventra-web-AlarmLow-28a2a1cb-1b27-4e2b-a48b-bb993faffe5b in state ALARM triggered policy eventra-web-requests-target	Setting desired count to 1.
+2026-11-01T00:52:03.687000+05:00	Successful	monitor alarm TargetTracking-service/eventra/eventra-web-AlarmLow-28a2a1cb-1b27-4e2b-a48b-bb993faffe5b in state ALARM triggered policy eventra-web-requests-target	Setting desired count to 2.
+2026-11-01T00:33:16.003000+05:00	Successful	monitor alarm TargetTracking-service/eventra/eventra-web-AlarmHigh-ce3a6080-bccd-4c3a-b319-32105dd318f3 in state ALARM triggered policy eventra-web-requests-target	Setting desired count to 3.

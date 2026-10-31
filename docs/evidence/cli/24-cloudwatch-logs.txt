@@ -1,0 +1,10 @@
+﻿# Centralized container logs from CloudWatch log group /ecs/eventra
+# stream: app/app/fa215ddfd3ee4be7a8e6d521cd214385 (first lines of the API container)
+2026-10-31 19:32:24  Admin account ready: admin@eventra.app
+2026-10-31 19:32:24  Events already exist � skipping sample events
+2026-10-31 19:32:24  Eventra API listening on port 4000 (production)
+2026-10-31 19:32:35  ::ffff:127.0.0.1 - - [31/Oct/2026:19:32:35 +0000] "GET /api/health HTTP/1.1" 200 76 "-" "Wget"
+2026-10-31 19:32:50  ::ffff:127.0.0.1 - - [31/Oct/2026:19:32:50 +0000] "GET /api/health HTTP/1.1" 200 76 "-" "Wget"
+2026-10-31 19:33:05  ::ffff:127.0.0.1 - - [31/Oct/2026:19:33:05 +0000] "GET /api/health HTTP/1.1" 200 76 "-" "Wget"
+2026-10-31 19:33:20  ::ffff:127.0.0.1 - - [31/Oct/2026:19:33:20 +0000] "GET /api/health HTTP/1.1" 200 76 "-" "Wget"
+2026-10-31 19:33:35  ::ffff:127.0.0.1 - - [31/Oct/2026:19:33:35 +0000] "GET /api/health HTTP/1.1" 200 76 "-" "Wget"

@@ -1,6 +1,6 @@
 # Route tables and routes
 # $ aws_ ec2 describe-route-tables --filters Name=vpc-id,Values=vpc-094b9a97fabee7289 --query RouteTables[].{Name:Tags[?Key==`Name`]|[0].Value,Routes:Routes[].[DestinationCidrBlock,GatewayId||NetworkInterfaceId||`local`]} --output yaml
-# captured 2026-10-31T14:19:48Z
+# captured 2026-10-31T19:53:16Z
 
 - Name: eventra-rt-private-db
   Routes:

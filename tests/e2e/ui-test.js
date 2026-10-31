@@ -146,7 +146,7 @@ const noHorizontalScroll = (page) =>
     await new Promise((r) => setTimeout(r, 2500)); // let the chart's grow-in animation finish
     const barWidth = await page.evaluate(() => Math.max(0, ...[...document.querySelectorAll('.recharts-bar-rectangle path')].map((b) => b.getBoundingClientRect().width)));
     check('U17b chart bars are actually drawn', barWidth > 20, `widest bar ${Math.round(barWidth)}px`);
-    await shot(page, '07-dashboard');
+    await page.screenshot({ path: path.join(OUT, '07-dashboard.png') }); // viewport only: a full-page shot resizes and restarts the chart animation
 
     await page.goto(`${BASE}/admin/events/new`, { waitUntil: 'networkidle0' });
     await page.waitForSelector('::-p-aria(Title)');
