@@ -1,0 +1,24 @@
+# Route tables and routes
+# $ aws_ ec2 describe-route-tables --filters Name=vpc-id,Values=vpc-094b9a97fabee7289 --query RouteTables[].{Name:Tags[?Key==`Name`]|[0].Value,Routes:Routes[].[DestinationCidrBlock,GatewayId||NetworkInterfaceId||`local`]} --output yaml
+# captured 2026-10-31T14:19:48Z
+
+- Name: eventra-rt-private-db
+  Routes:
+  - - 10.0.0.0/16
+    - local
+- Name: eventra-rt-public
+  Routes:
+  - - 10.0.0.0/16
+    - local
+  - - 0.0.0.0/0
+    - igw-0db39903acb194ed8
+- Name: null
+  Routes:
+  - - 10.0.0.0/16
+    - local
+- Name: eventra-rt-private-app
+  Routes:
+  - - 10.0.0.0/16
+    - local
+  - - 0.0.0.0/0
+    - eni-052e20c1a07fd9928

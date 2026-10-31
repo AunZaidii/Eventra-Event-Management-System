@@ -1,0 +1,21 @@
+# CloudWatch alarms and log group
+# $ bash -c aws --region us-east-1 cloudwatch describe-alarms --alarm-name-prefix eventra   --query 'MetricAlarms[].{Alarm:AlarmName,State:StateValue,Metric:MetricName}' --output table;   aws --region us-east-1 logs describe-log-groups --log-group-name-prefix /ecs/eventra --query 'logGroups[].{Name:logGroupName,RetentionDays:retentionInDays}' --output table
+# captured 2026-10-31T14:21:11Z
+
+-------------------------------------------------------------------------
+|                            DescribeAlarms                             |
++--------------------------------+-----------------------------+--------+
+|              Alarm             |           Metric            | State  |
++--------------------------------+-----------------------------+--------+
+|  eventra-alb-5xx               |  HTTPCode_Target_5XX_Count  |  OK    |
+|  eventra-app-cpu-high          |  CPUUtilization             |  OK    |
+|  eventra-db-cpu-high           |  CPUUtilization             |  OK    |
+|  eventra-unhealthy-web-targets |  UnHealthyHostCount         |  OK    |
++--------------------------------+-----------------------------+--------+
+-----------------------------------
+|        DescribeLogGroups        |
++---------------+-----------------+
+|     Name      |  RetentionDays  |
++---------------+-----------------+
+|  /ecs/eventra |  7              |
++---------------+-----------------+

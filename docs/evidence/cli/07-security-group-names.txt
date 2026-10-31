@@ -1,0 +1,16 @@
+# Security group IDs and names
+# $ aws_ ec2 describe-security-groups --filters Name=vpc-id,Values=vpc-094b9a97fabee7289 --query SecurityGroups[].{Id:GroupId,Name:GroupName,Description:Description} --output table
+# captured 2026-10-31T14:20:10Z
+
+------------------------------------------------------------------------------------------------------------------------
+|                                                DescribeSecurityGroups                                                |
++---------------------------------------------------------------------------+-----------------------+------------------+
+|                                Description                                |          Id           |      Name        |
++---------------------------------------------------------------------------+-----------------------+------------------+
+|  Load balancer: HTTP from the internet, forwards only to the web tier     |  sg-0f9dbc76115bb1631 |  eventra-alb-sg  |
+|  Web tier (Nginx): reachable only from the load balancer                  |  sg-054bcc3f2cc440da1 |  eventra-web-sg  |
+|  App tier (Node API): reachable only from the web tier                    |  sg-06dc00876f95964dd |  eventra-app-sg  |
+|  NAT instance: accepts traffic only from inside the VPC                   |  sg-0480205572dc3f99c |  eventra-nat-sg  |
+|  default VPC security group                                               |  sg-0de9d777b0a549632 |  default         |
+|  Database tier (RDS): reachable only from the app tier, no outbound rules |  sg-09d4ac6138857aa9a |  eventra-db-sg   |
++---------------------------------------------------------------------------+-----------------------+------------------+

@@ -1,0 +1,16 @@
+# Subnets (public / private-app / private-db in two AZs)
+# $ aws_ ec2 describe-subnets --filters Name=vpc-id,Values=vpc-094b9a97fabee7289 --query sort_by(Subnets,&CidrBlock)[].{Name:Tags[?Key==`Name`]|[0].Value,Cidr:CidrBlock,AZ:AvailabilityZone,PublicIP:MapPublicIpOnLaunch} --output table
+# captured 2026-10-31T14:19:44Z
+
+------------------------------------------------------------------------------
+|                               DescribeSubnets                              |
++------------+---------------+----------------------------------+------------+
+|     AZ     |     Cidr      |              Name                | PublicIP   |
++------------+---------------+----------------------------------+------------+
+|  us-east-1a|  10.0.0.0/24  |  eventra-public-us-east-1a       |  True      |
+|  us-east-1b|  10.0.1.0/24  |  eventra-public-us-east-1b       |  True      |
+|  us-east-1a|  10.0.10.0/24 |  eventra-private-app-us-east-1a  |  False     |
+|  us-east-1b|  10.0.11.0/24 |  eventra-private-app-us-east-1b  |  False     |
+|  us-east-1a|  10.0.20.0/24 |  eventra-private-db-us-east-1a   |  False     |
+|  us-east-1b|  10.0.21.0/24 |  eventra-private-db-us-east-1b   |  False     |
++------------+---------------+----------------------------------+------------+

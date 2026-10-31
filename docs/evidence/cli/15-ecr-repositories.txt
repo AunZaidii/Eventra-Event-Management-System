@@ -1,0 +1,12 @@
+# ECR repositories
+# $ aws_ ecr describe-repositories --repository-names eventra-web eventra-app --query repositories[].{Name:repositoryName,Uri:repositoryUri,ScanOnPush:imageScanningConfiguration.scanOnPush} --output table
+# captured 2026-10-31T14:20:49Z
+
+-------------------------------------------------------------------------------------------
+|                                  DescribeRepositories                                   |
++-------------+-------------+-------------------------------------------------------------+
+|    Name     | ScanOnPush  |                             Uri                             |
++-------------+-------------+-------------------------------------------------------------+
+|  eventra-web|  True       |  988710971825.dkr.ecr.us-east-1.amazonaws.com/eventra-web   |
+|  eventra-app|  True       |  988710971825.dkr.ecr.us-east-1.amazonaws.com/eventra-app   |
++-------------+-------------+-------------------------------------------------------------+

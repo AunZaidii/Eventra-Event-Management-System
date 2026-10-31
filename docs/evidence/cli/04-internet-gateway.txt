@@ -1,0 +1,28 @@
+# Internet Gateway
+# $ aws_ ec2 describe-internet-gateways --filters Name=attachment.vpc-id,Values=vpc-094b9a97fabee7289 --output table
+# captured 2026-10-31T14:19:54Z
+
+---------------------------------------------
+|         DescribeInternetGateways          |
++-------------------------------------------+
+||            InternetGateways             ||
+|+------------------------+----------------+|
+||    InternetGatewayId   |    OwnerId     ||
+|+------------------------+----------------+|
+||  igw-0db39903acb194ed8 |  988710971825  ||
+|+------------------------+----------------+|
+|||              Attachments              |||
+||+------------+--------------------------+||
+|||    State   |          VpcId           |||
+||+------------+--------------------------+||
+|||  available |  vpc-094b9a97fabee7289   |||
+||+------------+--------------------------+||
+|||                 Tags                  |||
+||+------------+--------------------------+||
+|||     Key    |          Value           |||
+||+------------+--------------------------+||
+|||  Course    |  SE-490 Cloud Computing  |||
+|||  Project   |  eventra                 |||
+|||  Name      |  eventra-igw             |||
+|||  ManagedBy |  terraform               |||
+||+------------+--------------------------+||

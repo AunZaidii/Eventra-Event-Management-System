@@ -1,0 +1,15 @@
+# RDS PostgreSQL instance
+# $ aws_ rds describe-db-instances --db-instance-identifier eventra-db --query DBInstances[].{Id:DBInstanceIdentifier,Engine:Engine,Version:EngineVersion,Class:DBInstanceClass,Status:DBInstanceStatus,PubliclyAccessible:PubliclyAccessible,MultiAZ:MultiAZ,Encrypted:StorageEncrypted,SubnetGroup:DBSubnetGroup.DBSubnetGroupName,SecurityGroups:VpcSecurityGroups[].VpcSecurityGroupId} --output yaml
+# captured 2026-10-31T14:20:43Z
+
+- Class: db.t4g.micro
+  Encrypted: true
+  Engine: postgres
+  Id: eventra-db
+  MultiAZ: false
+  PubliclyAccessible: false
+  SecurityGroups:
+  - sg-09d4ac6138857aa9a
+  Status: available
+  SubnetGroup: eventra-db-subnets
+  Version: '16.13'

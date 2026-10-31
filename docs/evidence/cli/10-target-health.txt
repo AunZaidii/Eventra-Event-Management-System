@@ -1,0 +1,11 @@
+# Target group health (web tasks)
+# $ aws_ elbv2 describe-target-health --target-group-arn arn:aws:elasticloadbalancing:us-east-1:988710971825:targetgroup/eventra-web-tg/c75fe453a4bf1c06 --query TargetHealthDescriptions[].{TaskIp:Target.Id,Port:Target.Port,AZ:Target.AvailabilityZone,Health:TargetHealth.State} --output table
+# captured 2026-10-31T14:20:23Z
+
+--------------------------------------------------
+|              DescribeTargetHealth              |
++-------------+----------+-------+---------------+
+|     AZ      | Health   | Port  |    TaskIp     |
++-------------+----------+-------+---------------+
+|  us-east-1b |  healthy |  80   |  10.0.11.217  |
++-------------+----------+-------+---------------+

@@ -1,0 +1,21 @@
+# ECS auto scaling targets and policies
+# $ bash -c aws --region us-east-1 application-autoscaling describe-scalable-targets --service-namespace ecs   --query 'ScalableTargets[].{Resource:ResourceId,Min:MinCapacity,Max:MaxCapacity}' --output table;   aws --region us-east-1 application-autoscaling describe-scaling-policies --service-namespace ecs   --query 'ScalingPolicies[].{Policy:PolicyName,Type:PolicyType,Target:TargetTrackingScalingPolicyConfiguration.TargetValue,Metric:TargetTrackingScalingPolicyConfiguration.PredefinedMetricSpecification.PredefinedMetricType}' --output table
+# captured 2026-10-31T14:20:37Z
+
+-----------------------------------------------
+|           DescribeScalableTargets           |
++-----+------+--------------------------------+
+| Max | Min  |           Resource             |
++-----+------+--------------------------------+
+|  3  |  1   |  service/eventra/eventra-app   |
+|  3  |  1   |  service/eventra/eventra-web   |
++-----+------+--------------------------------+
+-------------------------------------------------------------------------------------------------------
+|                                       DescribeScalingPolicies                                       |
++----------------------------------+-------------------------------+---------+------------------------+
+|              Metric              |            Policy             | Target  |         Type           |
++----------------------------------+-------------------------------+---------+------------------------+
+|  ECSServiceAverageCPUUtilization |  eventra-app-cpu-target       |  60.0   |  TargetTrackingScaling |
+|  ECSServiceAverageCPUUtilization |  eventra-web-cpu-target       |  60.0   |  TargetTrackingScaling |
+|  ALBRequestCountPerTarget        |  eventra-web-requests-target  |  500.0  |  TargetTrackingScaling |
++----------------------------------+-------------------------------+---------+------------------------+

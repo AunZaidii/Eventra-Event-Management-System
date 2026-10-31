@@ -1,6 +1,28 @@
 # Test Report: Eventra
 
-> **Latest run: 2026-10-21, re-test after Fix loop 1 and Fix loop 2: ALL PASSED.**
+> **Latest run: 2026-10-31, live AWS deployment: ALL PASSED** (see "Live AWS deployment" below).
+
+## Live AWS deployment (2026-10-31)
+
+| Check | Result |
+|---|---|
+| GitHub Actions deploy: images pushed to ECR, app and web services rolled out | ✅ images in ECR, both ECS services running |
+| `/api/health` through ALB → Nginx → Service Connect → API → RDS | ✅ `{"status":"ok","db":"up"}` |
+| ALB target group | ✅ web task healthy (private IP 10.0.11.x) |
+| Browser UI suite against the ALB address (`tests/e2e/ui-test.js`) | ✅ **30 / 30 passed** |
+| AWS CLI evidence (`infra/collect-evidence.sh`) | ✅ 22 files in `docs/evidence/cli/` |
+
+### Deployment problems found and fixed
+| Problem | Cause | Fix |
+|---|---|---|
+| `CreateCluster`: ECS service-linked role not ready | First ECS use on a new account | Role exists after the first attempt; re-ran `terraform apply` |
+| `RunInstances`: type not eligible for Free Tier | Free account plan rejects t4g.nano | NAT instance changed to t4g.micro |
+| Deploy job: `AssumeRoleWithWebIdentity` AccessDenied | GitHub's OIDC subject now has immutable IDs (`repo:owner@id/name@id:...`) | Trust policy accepts both formats, still limited to this repo and main/production |
+| Deploy job: `invalid tag ... ECR_REPO_WEB` | Repository variable held its own name as the value | Variable set to `eventra-web` |
+
+The AWS console screenshots are still to be taken by the repo owner (`docs/evidence-checklist.md`).
+
+> **Local re-test, 2026-10-21, after Fix loop 1 and Fix loop 2: ALL PASSED.**
 > The first run (below, kept for the record) found 3 UI bugs. All 3 are now fixed and verified.
 
 ## Re-test summary (after fixes)

@@ -1,0 +1,21 @@
+# Security groups and rules per tier
+# $ aws_ ec2 describe-security-group-rules --filters Name=group-id,Values=sg-0f9dbc76115bb1631,sg-054bcc3f2cc440da1,sg-06dc00876f95964dd,sg-0480205572dc3f99c,sg-09d4ac6138857aa9a --query sort_by(SecurityGroupRules,&GroupId)[].{Group:GroupId,Egress:IsEgress,Proto:IpProtocol,From:FromPort,To:ToPort,Cidr:CidrIpv4,FromGroup:ReferencedGroupInfo.GroupId,Description:Description} --output table
+# captured 2026-10-31T14:20:07Z
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|                                                                      DescribeSecurityGroupRules                                                                       |
++-------------+---------------------------------------------------------------------+---------+-------+-----------------------+-----------------------+--------+--------+
+|    Cidr     |                             Description                             | Egress  | From  |       FromGroup       |         Group         | Proto  |  To    |
++-------------+---------------------------------------------------------------------+---------+-------+-----------------------+-----------------------+--------+--------+
+|  10.0.0.0/16|  Any traffic from inside the VPC (to be forwarded to the internet)  |  False  |  -1   |  None                 |  sg-0480205572dc3f99c |  -1    |  -1    |
+|  0.0.0.0/0  |  Forward outbound traffic to the internet                           |  True   |  -1   |  None                 |  sg-0480205572dc3f99c |  -1    |  -1    |
+|  0.0.0.0/0  |  HTTPS out via NAT: pull images from ECR, send logs to CloudWatch   |  True   |  443  |  None                 |  sg-054bcc3f2cc440da1 |  tcp   |  443   |
+|  None       |  HTTP from the load balancer only                                   |  False  |  80   |  sg-0f9dbc76115bb1631 |  sg-054bcc3f2cc440da1 |  tcp   |  80    |
+|  None       |  API calls to the app tier (Service Connect)                        |  True   |  4000 |  sg-06dc00876f95964dd |  sg-054bcc3f2cc440da1 |  tcp   |  4000  |
+|  None       |  PostgreSQL to the database tier                                    |  True   |  5432 |  sg-09d4ac6138857aa9a |  sg-06dc00876f95964dd |  tcp   |  5432  |
+|  0.0.0.0/0  |  HTTPS out via NAT: ECR, Secrets Manager, CloudWatch                |  True   |  443  |  None                 |  sg-06dc00876f95964dd |  tcp   |  443   |
+|  None       |  API port from the web tier only                                    |  False  |  4000 |  sg-054bcc3f2cc440da1 |  sg-06dc00876f95964dd |  tcp   |  4000  |
+|  None       |  PostgreSQL from the app tier only                                  |  False  |  5432 |  sg-06dc00876f95964dd |  sg-09d4ac6138857aa9a |  tcp   |  5432  |
+|  0.0.0.0/0  |  HTTP from anywhere                                                 |  False  |  80   |  None                 |  sg-0f9dbc76115bb1631 |  tcp   |  80    |
+|  None       |  Forward requests and health checks to web tasks                    |  True   |  80   |  sg-054bcc3f2cc440da1 |  sg-0f9dbc76115bb1631 |  tcp   |  80    |
++-------------+---------------------------------------------------------------------+---------+-------+-----------------------+-----------------------+--------+--------+

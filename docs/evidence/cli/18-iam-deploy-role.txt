@@ -1,0 +1,29 @@
+# GitHub OIDC deploy role trust policy
+# $ aws_ iam get-role --role-name eventra-github-deploy --query Role.AssumeRolePolicyDocument --output json
+# captured 2026-10-31T14:21:07Z
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Federated": "arn:aws:iam::988710971825:oidc-provider/token.actions.githubusercontent.com"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+                "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                },
+                "StringLike": {
+                    "token.actions.githubusercontent.com:sub": [
+                        "repo:AunZaidii/Eventra-Event-Management-System:ref:refs/heads/main",
+                        "repo:AunZaidii/Eventra-Event-Management-System:environment:production",
+                        "repo:AunZaidii@*/Eventra-Event-Management-System@*:ref:refs/heads/main",
+                        "repo:AunZaidii@*/Eventra-Event-Management-System@*:environment:production"
+                    ]
+                }
+            }
+        }
+    ]
+}

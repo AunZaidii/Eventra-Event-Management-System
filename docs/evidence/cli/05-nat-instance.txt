@@ -1,0 +1,14 @@
+# NAT instance (cost-optimised NAT)
+# $ aws_ ec2 describe-instances --filters Name=tag:Name,Values=eventra-nat-instance Name=instance-state-name,Values=running --query Reservations[].Instances[].{Id:InstanceId,Type:InstanceType,State:State.Name,PublicIp:PublicIpAddress,SourceDestCheck:SourceDestCheck,Subnet:SubnetId} --output table
+# captured 2026-10-31T14:19:59Z
+
+-------------------------------------------------
+|               DescribeInstances               |
++------------------+----------------------------+
+|  Id              |  i-06314ef765c947d7e       |
+|  PublicIp        |  44.197.180.237            |
+|  SourceDestCheck |  False                     |
+|  State           |  running                   |
+|  Subnet          |  subnet-00aef534c48599a0f  |
+|  Type            |  t4g.micro                 |
++------------------+----------------------------+

@@ -143,6 +143,9 @@ const noHorizontalScroll = (page) =>
     await page.waitForSelector('.recharts-bar-rectangle');
     const dash = await text(page);
     check('U17 dashboard shows stats and chart', dash.includes('Total events') && dash.includes('Total registrations') && dash.includes('Upcoming events'));
+    await new Promise((r) => setTimeout(r, 2500)); // let the chart's grow-in animation finish
+    const barWidth = await page.evaluate(() => Math.max(0, ...[...document.querySelectorAll('.recharts-bar-rectangle path')].map((b) => b.getBoundingClientRect().width)));
+    check('U17b chart bars are actually drawn', barWidth > 20, `widest bar ${Math.round(barWidth)}px`);
     await shot(page, '07-dashboard');
 
     await page.goto(`${BASE}/admin/events/new`, { waitUntil: 'networkidle0' });
@@ -193,6 +196,7 @@ const noHorizontalScroll = (page) =>
     await page.goto(`${BASE}/admin`, { waitUntil: 'networkidle0' });
     await page.waitForSelector('::-p-text(Registrations per event)');
     check('U25 admin dashboard fits a phone screen', await noHorizontalScroll(page));
+    await new Promise((r) => setTimeout(r, 2500));
     await shot(page, '11-dashboard-phone');
 
     await page.click('button[aria-label="Open menu"]');

@@ -1,0 +1,16 @@
+# Running ECS tasks
+# $ bash -c aws --region us-east-1 ecs describe-tasks --cluster eventra --tasks $(aws --region us-east-1 ecs list-tasks --cluster eventra --query 'taskArns' --output text)   --query 'tasks[].{Group:group,Status:lastStatus,Health:healthStatus,AZ:availabilityZone,CapacityProvider:capacityProvider,Image:containers[0].image}' --output yaml
+# captured 2026-10-31T14:20:31Z
+
+- AZ: us-east-1b
+  CapacityProvider: null
+  Group: service:eventra-web
+  Health: HEALTHY
+  Image: 988710971825.dkr.ecr.us-east-1.amazonaws.com/eventra-web:3da133d2e5307f9155a09a1239f313f50f8c8069
+  Status: RUNNING
+- AZ: us-east-1b
+  CapacityProvider: null
+  Group: service:eventra-app
+  Health: HEALTHY
+  Image: null
+  Status: RUNNING

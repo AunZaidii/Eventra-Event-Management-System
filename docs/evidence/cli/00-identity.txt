@@ -1,0 +1,9 @@
+# Account and region
+# $ aws_ sts get-caller-identity
+# captured 2026-10-31T14:19:33Z
+
+{
+    "UserId": "AIDA6MM6EFGY3MC3B5SO3",
+    "Account": "988710971825",
+    "Arn": "arn:aws:iam::988710971825:user/eventra-admin"
+}

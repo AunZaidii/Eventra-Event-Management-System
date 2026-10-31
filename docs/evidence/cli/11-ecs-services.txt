@@ -1,0 +1,20 @@
+# ECS services
+# $ aws_ ecs describe-services --cluster eventra --services eventra-web eventra-app --query services[].{Service:serviceName,Status:status,Desired:desiredCount,Running:runningCount,TaskDef:taskDefinition,Launch:capacityProviderStrategy[].capacityProvider} --output yaml
+# captured 2026-10-31T14:20:27Z
+
+- Desired: 1
+  Launch:
+  - FARGATE_SPOT
+  - FARGATE
+  Running: 1
+  Service: eventra-web
+  Status: ACTIVE
+  TaskDef: arn:aws:ecs:us-east-1:988710971825:task-definition/eventra-web:2
+- Desired: 1
+  Launch:
+  - FARGATE_SPOT
+  - FARGATE
+  Running: 1
+  Service: eventra-app
+  Status: ACTIVE
+  TaskDef: arn:aws:ecs:us-east-1:988710971825:task-definition/eventra-app:2

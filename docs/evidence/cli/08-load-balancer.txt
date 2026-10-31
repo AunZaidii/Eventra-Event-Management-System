@@ -1,0 +1,11 @@
+# Application Load Balancer
+# $ aws_ elbv2 describe-load-balancers --load-balancer-arns arn:aws:elasticloadbalancing:us-east-1:988710971825:loadbalancer/app/eventra-alb/0d33f36fa543f8ba --query LoadBalancers[].{Name:LoadBalancerName,DNS:DNSName,Scheme:Scheme,State:State.Code,AZs:AvailabilityZones[].ZoneName} --output yaml
+# captured 2026-10-31T14:20:13Z
+
+- AZs:
+  - us-east-1a
+  - us-east-1b
+  DNS: eventra-alb-1161830609.us-east-1.elb.amazonaws.com
+  Name: eventra-alb
+  Scheme: internet-facing
+  State: active

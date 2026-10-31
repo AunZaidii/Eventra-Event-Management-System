@@ -1,0 +1,11 @@
+# Load balancer listeners
+# $ aws_ elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-1:988710971825:loadbalancer/app/eventra-alb/0d33f36fa543f8ba --query Listeners[].{Port:Port,Protocol:Protocol,Action:DefaultActions[0].Type} --output table
+# captured 2026-10-31T14:20:17Z
+
+---------------------------------
+|       DescribeListeners       |
++---------+--------+------------+
+| Action  | Port   | Protocol   |
++---------+--------+------------+
+|  forward|  80    |  HTTP      |
++---------+--------+------------+

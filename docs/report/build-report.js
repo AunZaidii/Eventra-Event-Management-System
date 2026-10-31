@@ -245,14 +245,15 @@ body.push(
     [
       ['Backend (Jest + Supertest)', 'Health/DB-down 503, listing and filters, registration, duplicate email, full event, concurrent overbooking, admin auth, CRUD, CSV, rate limits', '78 / 78 passed (88% statement coverage)'],
       ['API end-to-end via Nginx', 'Full flow on docker compose: admin creates event, visitor registers, duplicate and sold-out, CSV, DB and API ports not exposed, non-root container', '27 / 27 passed'],
-      ['Browser UI (headless Chrome)', 'Real UI on desktop and phone: filters, registration, confirmation, admin login, create/delete event, CSV export', '29 / 29 passed (after 2 fix loops)'],
+      ['Browser UI (headless Chrome)', 'Real UI on desktop and phone: filters, registration, confirmation, admin login, create/delete event, CSV export', '30 / 30 passed (after 2 fix loops)'],
       ['Cloud-readiness', 'Two app replicas with one JWT (stateless), health 503 when DB is down, data persists across restarts', '3 / 3 passed'],
-      ['GitHub Actions CI', 'Tests, lint/build, Terraform validate, Docker builds on every push', 'Green; deploy job runs once AWS is enabled'],
+      ['GitHub Actions CI/CD', 'Tests, lint/build, Terraform validate, Docker builds, push to ECR, rolling ECS deploy, smoke test', 'Successful deploy on main (Figure 2)'],
+      ['Live AWS deployment', 'The full browser suite (30 checks) run against the ALB address: registration, duplicate, sold out, admin login, create/delete event, CSV, phone layouts', '30 / 30 passed on AWS'],
     ],
     [2300, 4626, 2100],
   ),
   spacer(),
-  p('Testing found and fixed one critical defect (a React effect returned the Promise from window.scrollTo(), blanking the page on navigation in current Chrome) and two layout issues; the regression checks are part of the UI suite. Figures 2 and 3 show the automated deployment run and the live application served through the load balancer; the complete evidence set is in Appendix A.'),
+  p('Testing found and fixed one critical defect (a React effect returned the Promise from window.scrollTo(), blanking the page on navigation in current Chrome) and two layout issues; the regression checks are part of the UI suite. The first cloud deployment exposed four configuration issues, each fixed and documented: the ECS service-linked role was not yet ready on a new account, the free account plan rejected t4g.nano, GitHub’s OIDC subject now includes immutable owner and repository IDs (the IAM trust policy was extended to accept them), and one repository variable held a wrong value (found in the deploy job log). Figures 2 and 3 show the automated deployment run and the live application served through the load balancer; the complete evidence set is in Appendix A.'),
   ...shot('26-github-actions-run.png', 'GitHub Actions run with all jobs green, including the AWS deploy', 'GitHub → Actions → latest run on main'),
   ...shot('28-app-in-browser.png', 'Eventra running on AWS, opened through the ALB address', 'Browser showing the website_url from terraform output'),
 );

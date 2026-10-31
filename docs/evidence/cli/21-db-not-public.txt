@@ -1,0 +1,5 @@
+# Proof: database endpoint is private (resolves to a 10.x address, no public access)
+# $ bash -c aws --region us-east-1 rds describe-db-instances --db-instance-identifier eventra-db --query 'DBInstances[0].[Endpoint.Address,PubliclyAccessible]' --output text
+# captured 2026-10-31T14:21:21Z
+
+eventra-db.cwjy6yo2khb9.us-east-1.rds.amazonaws.com	False

@@ -125,7 +125,7 @@ cd tests/e2e && npm install
 export BASE_URL="$(cd ../../infra/terraform && terraform output -raw website_url)"
 export ADMIN_EMAIL=admin@eventra.app
 export ADMIN_PASSWORD='<password from step 4>'
-node ui-test.js ../../docs/evidence/app            # 29 browser checks + screenshots
+node ui-test.js ../../docs/evidence/app            # 30 browser checks + screenshots
 ```
 
 ## Step 8: Optional demos for the report
