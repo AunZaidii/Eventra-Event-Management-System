@@ -82,7 +82,7 @@ export default function Home() {
             Registrations are open for this season
           </span>
           <h1 className="font-display text-[clamp(40px,6vw,68px)] leading-[1.02] font-extrabold tracking-[-0.035em]">
-            Find events worth <span className="text-brand-600">showing up</span> for.
+            Find batool worth <span className="text-brand-600">showing up</span> for.
           </h1>
           <p className="max-w-[540px] text-lg text-muted">
             Conferences, workshops, meetups and concerts in one place. Pick an event, grab your seat in seconds, and get
