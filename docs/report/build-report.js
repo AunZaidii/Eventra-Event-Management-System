@@ -11,10 +11,9 @@ const {
 
 // ---------- Fill in your details ----------
 const STUDENT = {
-  name: 'Aun Zaidi',
-  roll: '[Roll Number]',
-  section: '[Section]',
-  instructor: '[Instructor Name]',
+  name: 'Batool Fatima (SE-23076), Syed Muhammad Aun Zaidi (SE-23095)',
+  section: 'Section B',
+  instructor: 'Miss Amna',
 };
 const REPO_URL = 'https://github.com/AunZaidii/Eventra-Event-Management-System';
 // -------------------------------------------
@@ -127,6 +126,9 @@ const usedCli = new Set();
 // Console screenshot if present, otherwise the real AWS CLI output for the same component.
 function ev(name, caption, cli) {
   if (fs.existsSync(path.join(EVIDENCE, 'screenshots', name)) || !cli) return shot(name, caption);
+  return cliFigure(cli, caption);
+}
+function cliFigure(cli, caption) {
   if (usedCli.has(cli)) return [];
   usedCli.add(cli);
   const shared = {
@@ -152,7 +154,7 @@ body.push(
   new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 240 },
-    children: [new TextRun({ text: `${STUDENT.name} · ${STUDENT.roll} · ${STUDENT.section} · Instructor: ${STUDENT.instructor}`, size: 20 }), new TextRun({ text: `Repository: ${REPO_URL}`, break: 1, size: 20, color: COLORS.brand })],
+    children: [new TextRun({ text: `${STUDENT.name} · ${STUDENT.section} · Instructor: ${STUDENT.instructor}`, size: 20 }), new TextRun({ text: `Repository: ${REPO_URL}`, break: 1, size: 20, color: COLORS.brand })],
     border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: COLORS.brand, space: 8 } },
   }),
 );
@@ -298,13 +300,13 @@ body.push(
   table(
     ['Component', 'Configuration', 'USD / month'],
     [
-      ['Application Load Balancer', '1 ALB, ~1 LCU', '17.4'],
+      ['Application Load Balancer', '1 ALB, ~0.2 LCU', '17.6'],
       ['ECS Fargate', '2 tasks × 0.25 vCPU / 0.5 GB, 24×7', '18.0'],
       ['NAT instance', 'EC2 t4g.micro + 8 GB gp3', '6.8'],
       ['Public IPv4', '3 addresses (NAT + 2 ALB nodes)', '11.0'],
       ['RDS PostgreSQL', 'db.t4g.micro single-AZ, 20 GB gp3', '14.0'],
-      ['Secrets Manager, CloudWatch, Cloud Map, ECR', '1 secret, ~0.3 GB logs, 4 alarms, 0.5 GB images', '1.2'],
-      ['**Total**', 'us-east-1 on-demand, low traffic', '**≈ 68 (≈ 2.25 / day)**'],
+      ['Secrets Manager, CloudWatch, ECR', '1 secret, ~0.3 GB logs, 4 alarms, 0.5 GB images', '1.05'],
+      ['**Total**', 'us-east-1 on-demand, low traffic', '**68.36 (≈ 2.25 / day)**'],
     ],
     [3000, 4126, 1900],
   ),
@@ -321,10 +323,27 @@ body.push(
 
 // Appendix A
 const CLI = {"01-vpc.png":"01-vpc.png","02-subnets.png":"02-subnets.png","03-route-tables.png":"03-route-tables.png","04-route-table-private.png":"03-route-tables.png","05-internet-gateway.png":"04-internet-gateway.png","06-nat-instance.png":"05-nat-instance.png","07-ecs-cluster.png":"11-ecs-services.png","08-ecs-tasks.png":"12-ecs-tasks.png","09-ecs-service-connect.png":"11-ecs-services.png","10-autoscaling.png":"13-autoscaling.png","11-sg-alb.png":"06-security-groups.png","12-sg-web.png":"06-security-groups.png","13-sg-app.png":"06-security-groups.png","14-sg-db.png":"06-security-groups.png","15-load-balancer.png":"08-load-balancer.png","16-target-group.png":"10-target-health.png","17-rds.png":"14-rds.png","18-rds-config.png":"14-rds.png","19-ecr-repos.png":"15-ecr-repositories.png","20-ecr-images.png":"16-ecr-images.png","21-secrets-manager.png":"17-secrets.png","22-iam-oidc.png":"18-iam-deploy-role.png","24-cloudwatch-alarms.png":"19-cloudwatch.png","25-cloudwatch-logs.png":"24-cloudwatch-logs.png","27-github-deploy-log.png":"docker-build.png"};
+// Extra console screenshots shown after the main one.
+const EXTRA = {
+  '02-subnets.png': [
+    ['02b-subnet-public-1b.png', 'Public subnet in us-east-1b (10.0.1.0/24)'],
+    ['02c-subnet-app-1a.png', 'Private app subnet in us-east-1a (10.0.10.0/24)'],
+    ['02d-subnet-app-1b.png', 'Private app subnet in us-east-1b (10.0.11.0/24)'],
+    ['02e-subnet-db-1a.png', 'Private database subnet in us-east-1a (10.0.20.0/24)'],
+    ['02f-subnet-db-1b.png', 'Private database subnet in us-east-1b (10.0.21.0/24)'],
+  ],
+  '04-route-table-private.png': [['04b-route-table-db.png', 'Private database route table: local route only, no internet']],
+  '15-load-balancer.png': [['15b-listener.png', 'Listener HTTP:80 forwarding to eventra-web-tg']],
+  '17-rds.png': [['17b-rds-sg-rules.png', 'RDS inbound rule: only the app tier security group']],
+  '20-ecr-images.png': [['20b-ecr-images-app.png', 'eventra-app images tagged with commit SHA and latest']],
+  '27-github-deploy-log.png': [['27b-github-smoke-test.png', 'Smoke test: live site reports status ok, database up']],
+};
+// CLI output kept beside the console screenshot where it shows columns the screenshot cuts off.
+const ALSO_CLI = new Set(['07-ecs-cluster.png', '17-rds.png']);
 const evidence = [
   ['Network / VPC', [
     ['01-vpc.png', 'VPC eventra-vpc (10.0.0.0/16)'],
-    ['02-subnets.png', 'Six subnets across two Availability Zones'],
+    ['02-subnets.png', 'Public subnet in us-east-1a (10.0.0.0/24)'],
     ['03-route-tables.png', 'Public route table: 0.0.0.0/0 → Internet Gateway'],
     ['04-route-table-private.png', 'Private app route table: 0.0.0.0/0 → NAT instance'],
     ['05-internet-gateway.png', 'Internet Gateway attached to the VPC'],
@@ -333,26 +352,26 @@ const evidence = [
   ['Compute / containers', [
     ['07-ecs-cluster.png', 'ECS cluster with the web and app services'],
     ['08-ecs-tasks.png', 'Running, healthy Fargate tasks'],
-    ['09-ecs-service-connect.png', 'Service Connect: app.eventra.local:4000, no public IP'],
-    ['10-autoscaling.png', 'Service auto scaling (min 1, max 3, target tracking)'],
+    ['09-ecs-service-connect.png', 'Service Connect on eventra-app: app.eventra.local:4000'],
+    ['10-autoscaling.png', 'Service auto scaling on eventra-app (1 to 3 tasks, target tracking)'],
   ]],
   ['Security groups', [
     ['11-sg-alb.png', 'alb-sg inbound: HTTP 80 from the internet'],
     ['12-sg-web.png', 'web-sg inbound: 80 from alb-sg only'],
     ['13-sg-app.png', 'app-sg inbound: 4000 from web-sg only'],
-    ['14-sg-db.png', 'db-sg inbound: 5432 from app-sg only'],
+    ['14-sg-db.png', 'db-sg inbound: 5432 from app-sg only, no outbound rules'],
   ]],
   ['Load balancer', [
-    ['15-load-balancer.png', 'Internet-facing ALB in two AZs with HTTP:80 listener'],
+    ['15-load-balancer.png', 'Internet-facing ALB in two Availability Zones'],
     ['16-target-group.png', 'Target group with healthy web task targets'],
   ]],
   ['Database', [
-    ['17-rds.png', 'RDS PostgreSQL — publicly accessible: No'],
+    ['17-rds.png', 'RDS PostgreSQL database eventra-db, status Available'],
     ['18-rds-config.png', 'RDS configuration — db.t4g.micro, encryption enabled'],
   ]],
   ['Container registry', [
-    ['19-ecr-repos.png', 'ECR repositories with scan on push'],
-    ['20-ecr-images.png', 'Images tagged with commit SHA and latest'],
+    ['19-ecr-repos.png', 'ECR repositories eventra-app and eventra-web'],
+    ['20-ecr-images.png', 'eventra-web images tagged with commit SHA and latest'],
   ]],
   ['Secrets, IAM and monitoring', [
     ['21-secrets-manager.png', 'Secrets Manager secret eventra/app (value not shown)'],
@@ -363,7 +382,7 @@ const evidence = [
   ]],
   ['CI/CD', [
     ['26-github-actions-run.png', 'GitHub Actions run with all jobs green, including the AWS deploy'],
-    ['27-github-deploy-log.png', 'Docker image build'],
+    ['27-github-deploy-log.png', 'Deploy job: Docker images built and pushed to ECR'],
   ]],
   ['Cost', [
     ['29-pricing-calculator.png', 'AWS Pricing Calculator estimate'],
@@ -409,21 +428,25 @@ body.push(table(['Brief item', 'Implementation', 'Where to verify', 'Status'], [
 ], [2300, 3500, 1900, 1326]));
 
 body.push(new Paragraph({ children: [new PageBreak()] }), h1('Appendix B — Deployment Evidence'));
-body.push(p('Evidence from the live deployment in AWS account 988710971825 (us-east-1). Figures marked "live AWS CLI output" show unmodified command output captured by infra/collect-evidence.sh; the full text is in docs/evidence/cli/.'));
+body.push(p('Evidence from the live deployment in AWS account 988710971825 (us-east-1). Screenshots are from the AWS Console and GitHub. Figures marked "live AWS CLI output" show unmodified command output captured by infra/collect-evidence.sh; the full text is in docs/evidence/cli/.'));
 for (const [group, items] of evidence) {
   body.push(h2(group));
   for (const [file, caption] of items) {
-    if (file === '23-cloudwatch-dashboard.png' && !fs.existsSync(path.join(EVIDENCE, 'screenshots', file))) {
+    if (file === '23-cloudwatch-dashboard.png') {
+      if (fs.existsSync(path.join(EVIDENCE, 'screenshots', file))) body.push(...shot(file, caption));
       const cw = (name, cap) => figure(path.join(EVIDENCE, 'cli-images', name), `${cap} (CloudWatch metric graph)`, null, 560, 240);
       body.push(...cw('cw-requests.png', 'Load balancer requests per minute during the load test'), ...cw('cw-healthy-hosts.png', 'Healthy web tasks behind the load balancer'), ...cw('cw-ecs-cpu.png', 'ECS CPU per service'));
     } else {
       body.push(...ev(file, caption, CLI[file]));
+      for (const [name, cap] of EXTRA[file] || []) body.push(...shot(name, cap));
+      if (ALSO_CLI.has(file)) body.push(...cliFigure(CLI[file], caption));
       if (file === '10-autoscaling.png') body.push(...figure(path.join(EVIDENCE, 'cli-images', '25-scaling-activities.png'), 'AWS record: alarms raised the task count under load and lowered it afterwards, automatically', null, 600, 220));
     }
   }
 }
-body.push(h2('Running application (captured automatically on the live site)'));
+body.push(h2('Running application on the live site'));
 body.push(
+  ...shot('28-app-in-browser.png', 'Live site in a browser, with the load balancer address in the address bar'),
   ...appShot('01-home-desktop.png', 'Homepage — upcoming events (desktop)', 700),
   ...appShot('02-home-phone-top.png', 'Homepage on a phone-size screen (top of page)', 640),
   ...appShot('03-event-details.png', 'Event details with registration form', 640),

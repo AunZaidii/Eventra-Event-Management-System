@@ -1,7 +1,7 @@
 # Monthly Cost Estimate: Eventra on AWS (us-east-1)
 
 On-demand list prices for us-east-1 (N. Virginia), 730 hours a month, low coursework traffic (well under 100 GB of data transfer out, which is free).
-**Confirm the numbers with the AWS Pricing Calculator** (<https://calculator.aws>) using the inputs in §3, and screenshot the result (evidence item 29). Prices change over time, and new accounts may also have Free Tier credits.
+**AWS Pricing Calculator result: $68.36/month** using the inputs in §3 ([saved estimate](https://calculator.aws/#/estimate?id=533269af66c81552ce9ac5c38996bdeb38381b98), evidence item 29). It leaves out Cloud Map ($0.20). Prices change over time, and new accounts may also have Free Tier credits.
 
 ## 1. Deployed configuration (cost-optimized, what Terraform creates)
 
